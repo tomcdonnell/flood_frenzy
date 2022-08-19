@@ -1,0 +1,90 @@
+------------------
+GovHack 2022 Ideas
+------------------
+
+Victoria Challenges
+-------------------
+
+ * Better use of data - Connecting addresses in datasets
+    * Get lots of data containing addresses
+    * Divide addresses into separate fields
+    * Attempt to match addresses from one data set with another
+    * A perfect match matches exactly on all fields
+    * An imperfect match matches on some fields
+    * Some fields are more important than others
+       - eg if two email addresses match, likely same person,
+            if two country fields match, not so likely
+
+ * Skills Development - Life after School
+    * 
+
+ * Water Quality - Gippland Lakes
+
+
+
+Nationwide Challenges
+---------------------
+
+ * A hydrogen economy
+
+ * Alternate transport
+
+ * Celebrating Tasmania's achievements
+
+ * Community wellbeing in the ACT
+
+ * Cultural diversity in the workplace
+
+ * Digitising your drinking water
+
+ * Discovering our region's environment and biodiversity
+
+ * Displacing Diesel
+
+ * Flood risk: Understanding the impact of climate change on extreme weather events in Hobart
+
+ * How can we beat Gamba Grass
+
+ * How can we utilise organic wastage in Barossa, Gawler, Light and Adelaide Plains region?
+
+ ** Integrate disparate data sources like a Palantir engineer
+
+ * Meeting short-term health needs outside of a hospital
+
+ * Moreton Bay greening as we grow
+
+ * Pricing public transport
+
+ * Protecting South Australian growers from Fruit Fly
+
+ * Reducing climate impact through sustainable energy behaviours
+
+ * Skills and employment in Barossa, Gawler, Light and Adelaide Plains region
+
+ * Skills Development - Life After School
+
+ * The NSW housing crisis
+
+ * Water Quality - Gippsland Lakes
+
+
+Australia (National) Challenges
+-------------------------------
+
+ * Emissions: The dark side of buildings
+
+ * Flood, fire, and the future: the road to resilience
+
+ * Helping Australia reach net zero emissions by 2050
+
+ * Small business performance indicators
+
+ * The 2021 Australian Census
+
+ * What's going where? (help transport planners plan for freight)
+
+
+International Challenges
+------------------------
+
+Managing or repurposing Covid-19 waste
