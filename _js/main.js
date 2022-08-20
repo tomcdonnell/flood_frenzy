@@ -254,13 +254,17 @@ function generateTerrainGrid()
 
 function onClickGameModeButton()
 {
-   $('div.buttons-div.simulation'              ).hide();
+   $('#canvas'                                 ).show();
    $('div.buttons-div.game'                    ).show();
-   $('input#simulation-mode-button'            ).closest('label').removeClass('selected');
-   $('input#game-mode-button'                  ).closest('label').addClass('selected');
-   $('p.simulation-instructions'               ).hide();
+   $('div.buttons-div.simulation'              ).hide();
+   $('div.color-key-div'                       ).show();
+   $('div.game-mode-div > label'               ).removeClass('selected');
    $('div.game-mode-start-sequence-popup'      ).hide();
    $('div.game-mode-start-sequence-popup.first').show();
+   $('div.high-scores-div'                     ).hide();
+   $('div.information-div'                     ).hide();
+   $('input#game-mode-button'                  ).closest('label').addClass('selected');
+   $('p.simulation-instructions'               ).hide();
 
    gameState.gameMode   = 'game';
    gameState.wallBudget = INITIAL_WALL_BUDGET;
@@ -270,16 +274,46 @@ function onClickGameModeButton()
 
 function onClickSimulationModeButton()
 {
-   $('div.buttons-div.simulation'        ).show();
+   $('#canvas'                           ).show();
    $('div.buttons-div.game'              ).hide();
-   $('input#simulation-mode-button'      ).closest('label').addClass('selected');
-   $('input#game-mode-button'            ).closest('label').removeClass('selected');
-   $('p.simulation-instructions'         ).show();
+   $('div.buttons-div.simulation'        ).show();
+   $('div.color-key-div'                 ).show();
+   $('div.game-mode-div > label'         ).removeClass('selected');
    $('div.game-mode-start-sequence-popup').hide();
+   $('div.high-scores-div'               ).hide();
+   $('div.information-div'               ).hide();
+   $('input#simulation-mode-button'      ).closest('label').addClass('selected');
+   $('p.simulation-instructions'         ).show();
 
    gameState.gameMode   = 'simulation';
    gameState.wallBudget = INITIAL_WALL_BUDGET * 10;
    $('span.wall-budget').html(gameState.wallBudget);
+}
+
+function onClickInformationModeButton()
+{
+   $('#canvas'                      ).hide();
+   $('div.buttons-div.game'         ).hide();
+   $('div.buttons-div.simulation'   ).hide();
+   $('div.color-key-div'            ).hide();
+   $('div.game-mode-div > label'    ).removeClass('selected');
+   $('div.high-scores-div'          ).hide();
+   $('div.information-div'          ).show();
+   $('input#information-mode-button').closest('label').addClass('selected');
+   $('p.simulation-instructions'    ).hide();
+}
+
+function onClickHighScoresModeButton()
+{
+   $('#canvas'                      ).hide();
+   $('div.buttons-div.game'         ).hide();
+   $('div.buttons-div.simulation'   ).hide();
+   $('div.color-key-div'            ).hide();
+   $('div.game-mode-div > label'    ).removeClass('selected');
+   $('div.high-scores-div'          ).show();
+   $('div.information-div'          ).hide();
+   $('input#high-scores-mode-button').closest('label').addClass('selected');
+   $('p.simulation-instructions'    ).hide();
 }
 
 function onClickGenerateNewTerrain()

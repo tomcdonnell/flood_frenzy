@@ -122,13 +122,13 @@ div.game-mode-round-start-popup > ul > li
     Simulation<br/>
     <input id='simulation-mode-button' type='radio' name='gameMode' value='simulation'/>
    </label>
-   <label for='information-button' onclick='onClickInformationButton()'>
+   <label for='information-mode-button' onclick='onClickInformationModeButton()'>
     Information<br/>
-    <input id='information-button' type='radio' name='gameMode' value='information'/>
+    <input id='information-mode-button' type='radio' name='gameMode' value='information'/>
    </label>
-   <label for='high-scores-button' onclick='onClickHighScoresButton()'>
+   <label for='high-scores-mode-button' onclick='onClickHighScoresModeButton()'>
     High Scores<br/>
-    <input id='high-scores-button' type='radio' name='gameMode' value='high-scores'/>
+    <input id='high-scores-mode-button' type='radio' name='gameMode' value='high-scores'/>
    </label>
   </div>
   <p class='simulation-instructions' style='display:none'>
@@ -149,6 +149,12 @@ div.game-mode-round-start-popup > ul > li
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.
   </canvas>
+  <div class='information-div' style='display:none'>
+   <h2>Information</h2>
+  </div>
+  <div class='high-scores-div' style='display:none'>
+   <h2>High Scores</h2>
+  </div>
   <div class='game-mode-start-sequence-popup first' style='display:none'>
    <img src='_images/27 mayor face.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
