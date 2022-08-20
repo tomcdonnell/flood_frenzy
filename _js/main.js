@@ -26,8 +26,7 @@ let gameState                 =
    gridNumbersAreShown: false,
    hasHouse           : true,
    isBuildingWalls    : false,
-   wallBudget         : INITIAL_WALL_BUDGET,
-   waterLevel         : null
+   wallBudget         : INITIAL_WALL_BUDGET
 };
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,20 +102,6 @@ function main(images)
    initialiseGameGrid();
 
    drawGameGrid(false); // Initially draw the grid without the numbers.
-
-   // Set water level to be the lowest height on the grid.
-   let lowestHeight = 999;
-   for (let x = 0; x < GRID_WIDTH; ++x)
-   {
-      for (let y = 0; y < GRID_HEIGHT; ++y)
-      {
-         if (gameGrid[x][y].height < lowestHeight)
-         {
-            lowestHeight = gameGrid[x][y].height;
-         }
-      }
-   }
-   gameState.waterLevel = lowestHeight;
 
    // Add images to color-key.
    for (let i = 0; i < 20; ++i)
@@ -440,8 +425,8 @@ function rainUntilWaterLevelRisesByOne(rainX, rainY)
       drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
    }
 
-   gameState.waterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
-   addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y);
+   let targetWaterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
+   addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y, targetWaterLevel);
 }
 
 function findLocalLowestGridCoordsRecursively(x, y)
@@ -515,7 +500,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
    return findLocalLowestGridCoordsRecursively(lowerGridSquare.x, lowerGridSquare.y);
 }
 
-function addWaterUpToWaterLevelRecursively(x, y)
+function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
 {
    if
    (
@@ -523,10 +508,10 @@ function addWaterUpToWaterLevelRecursively(x, y)
       //    current square's height is less than the water level...
       x >= 0 && x < GRID_WIDTH  &&
       y >= 0 && y < GRID_HEIGHT &&
-      gameGrid[x][y].height < gameState.waterLevel
+      gameGrid[x][y].height < targetWaterLevel
    )
    {
-      gameGrid[x][y].height       = gameState.waterLevel;
+      gameGrid[x][y].height       = targetWaterLevel;
       gameGrid[x][y].isUnderWater = true;
       drawSpriteOnGridSquare(x, y, globalImages[0]);
    }
@@ -553,17 +538,17 @@ function addWaterUpToWaterLevelRecursively(x, y)
          //    that square's height is less than the water level...
          coord.x >= 0 && coord.x < GRID_WIDTH  &&
          coord.y >= 0 && coord.y < GRID_HEIGHT &&
-         gameGrid[coord.x][coord.y].height < gameState.waterLevel
+         gameGrid[coord.x][coord.y].height < targetWaterLevel
       )
       {
-         gameGrid[coord.x][coord.y].height       = gameState.waterLevel;
+         gameGrid[coord.x][coord.y].height       = targetWaterLevel;
          gameGrid[coord.x][coord.y].isUnderWater = true;
 
          let imageIndex = ((gameGrid[coord.x][coord.y].hasHouse)? 22: 0);
 
          drawSpriteOnGridSquare(coord.x, coord.y, globalImages[imageIndex]);
 
-         addWaterUpToWaterLevelRecursively(coord.x, coord.y);
+         addWaterUpToWaterLevelRecursively(coord.x, coord.y, targetWaterLevel);
       }
    }
 }
