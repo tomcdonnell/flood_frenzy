@@ -19,8 +19,11 @@ span.wall-budget-container
 {
    border: 1px solid black;
    display: inline-block;
-   padding: 2px;
-   background-color: #eee;
+   font-size: 14px;
+   padding: 1px;
+   padding-left: 3px;
+   padding-right: 3px;
+   background-color: #88f;
 }
 
 div.color-key-div span.height-number-span
@@ -30,6 +33,11 @@ div.color-key-div span.height-number-span
    position: relative;
    left: 26px;
    bottom: 10px;
+}
+
+div.game-mode-div
+{
+   margin-bottom: 10px;
 }
 
 div.game-mode-div > label
@@ -47,12 +55,50 @@ div.game-mode-div > label.selected
    color: white;
 }
 
-div.game-mode-start-sequence-popup > p
+div.game-mode-start-sequence-popup,
+div.game-mode-round-start-popup
 {
-   position: relative;
+   background-color: white;
+   border: 10px solid black;
+   left: 50px;
+   padding: 20px;
+   position: absolute;
+   text-align: right;
+   top: 300px;
+   width: 800px;
+}
+
+div.game-mode-start-sequence-popup > p,
+div.game-mode-round-start-popup > p
+{
    bottom: 160px;
-   left: 245px;
+   left: 270px;
    line-height: 30px;
+   position: relative;
+   text-align: left;
+}
+
+div.game-mode-round-start-popup
+{
+   text-align: center;
+   font-size: 25px;
+}
+
+div.game-mode-round-start-popup button
+{
+   font-size: 25px;
+   margin-bottom: 20px;
+}
+
+div.game-mode-round-start-popup > ul
+{
+   font-size: 22px;
+   text-align: left;
+}
+
+div.game-mode-round-start-popup > ul > li
+{
+   margin-bottom: 5px;
 }
   </style>
  </head>
@@ -72,7 +118,7 @@ div.game-mode-start-sequence-popup > p
    Play with the buttons below, or click on any grid square to simulate rain falling on that square.
   </p>
   <div class='buttons-div game'>
-   <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>
+   <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
    <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
   </div>
   <div class='buttons-div simulation' style='display:none'>
@@ -86,25 +132,37 @@ div.game-mode-start-sequence-popup > p
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.
   </canvas>
-  <div class='game-mode-start-sequence-popup first'>
+  <div class='game-mode-start-sequence-popup first' style='display:none'>
    <img src='_images/27 mayor face.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>There's a hundred year flood coming.<br/>We need help to protect our homes.</p>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-start-sequence-popup.first').hide();$('div.game-mode-start-sequence-popup.second').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+   </div>
   </div>
-  <div class='game-mode-start-sequence-popup second'>
+  <div class='game-mode-start-sequence-popup second' style='display:none'>
    <img src='_images/25 army commander.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
-   <p>Hundred year flood eh?<br/>We've seen a few of those lately.</p>
+   <p>Hundred year flood you say?<br/>We've seen a few of those lately.</p>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-start-sequence-popup.second').hide();$('div.game-mode-start-sequence-popup.third').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+   </div>
   </div>
-  <div class='game-mode-start-sequence-popup third'>
+  <div class='game-mode-start-sequence-popup third' style='display:none'>
    <img src='_images/27 mayor face.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>
     This time will be worse than before.<br/>
     You'll have ten regions to protect.<br/>The floods will come thick and fast.
    </p>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-start-sequence-popup.third').hide();$('div.game-mode-start-sequence-popup.fourth').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+   </div>
   </div>
-  <div class='game-mode-start-sequence-popup fourth'>
+  <div class='game-mode-start-sequence-popup fourth' style='display:none'>
    <img src='_images/27 mayor face.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>
@@ -112,11 +170,31 @@ div.game-mode-start-sequence-popup > p
     Position your walls to protect houses before the floods arrive.<br/>
     And be careful not to run out of materials.
    </p>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-start-sequence-popup.fourth').hide();$('div.game-mode-start-sequence-popup.fifth').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+   </div>
   </div>
-  <div class='game-mode-start-sequence-popup fifth'>
+  <div class='game-mode-start-sequence-popup fifth' style='display:none'>
    <img src='_images/25 army commander.png' height='168'/>
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>I know the drill Mr Mayor.<br/>You can count on me.</p>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-start-sequence-popup.fifth').hide();$('div.game-mode-round-start-popup').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+   </div>
+  </div>
+  <div class='game-mode-round-start-popup' style='display:none'>
+   <h2>Round 1 of 10</h2>
+   <ul>
+    <li>Click and drag your mouse on the map to build walls</li>
+    <li>Position your walls to protect houses before the floods arrive</li>
+    <li>Be careful not to run out of materials</li>
+    <li>Be quick!  Flood waters will start rising in five seconds</li>
+   </ul>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.game-mode-round-start-popup').hide()">Start</button>
+   </div>
   </div>
   <script src='_js/main.js'></script>
  </body>

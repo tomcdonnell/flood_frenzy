@@ -22,7 +22,7 @@ let gameGrid                  = [];
 let terrainGrid               = [];
 let gameState                 =
 {
-   gameMode           : 'simulation', // Possible values: {'simulation', 'game'}
+   gameMode           : 'game', // Possible values: {'simulation', 'game'}
    gridNumbersAreShown: false,
    isBuildingWalls    : false,
    wallBudget         : INITIAL_WALL_BUDGET,
@@ -126,6 +126,8 @@ function main(images)
 
    $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
    $('span.wall-budget').html(gameState.wallBudget);
+
+   onClickGameModeButton();
 }
 
 // Initialisation functions. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,31 +254,32 @@ function generateTerrainGrid()
 
 function onClickGameModeButton()
 {
-   $('div.buttons-div.simulation'  ).hide();
-   $('div.buttons-div.game'        ).show();
-   $('input#simulation-mode-button').closest('label').removeClass('selected');
-   $('input#game-mode-button'      ).closest('label').addClass('selected');
-   $('p.simulation-instructions'   ).hide();
+   $('div.buttons-div.simulation'              ).hide();
+   $('div.buttons-div.game'                    ).show();
+   $('input#simulation-mode-button'            ).closest('label').removeClass('selected');
+   $('input#game-mode-button'                  ).closest('label').addClass('selected');
+   $('p.simulation-instructions'               ).hide();
+   $('div.game-mode-start-sequence-popup'      ).hide();
+   $('div.game-mode-start-sequence-popup.first').show();
 
+   gameState.gameMode   = 'game';
    gameState.wallBudget = INITIAL_WALL_BUDGET;
    $('span.wall-budget').html(gameState.wallBudget);
 
-   $('game-mode-start-sequence-popup'      ).hide();
-   $('game-mode-start-sequence-popup.first').show();
 }
 
 function onClickSimulationModeButton()
 {
-   $('div.buttons-div.simulation'  ).show();
-   $('div.buttons-div.game'        ).hide();
-   $('input#simulation-mode-button').closest('label').addClass('selected');
-   $('input#game-mode-button'      ).closest('label').removeClass('selected');
-   $('p.simulation-instructions'   ).show();
+   $('div.buttons-div.simulation'        ).show();
+   $('div.buttons-div.game'              ).hide();
+   $('input#simulation-mode-button'      ).closest('label').addClass('selected');
+   $('input#game-mode-button'            ).closest('label').removeClass('selected');
+   $('p.simulation-instructions'         ).show();
+   $('div.game-mode-start-sequence-popup').hide();
 
+   gameState.gameMode   = 'simulation';
    gameState.wallBudget = INITIAL_WALL_BUDGET * 10;
    $('span.wall-budget').html(gameState.wallBudget);
-
-   $('game-mode-start-sequence-popup').hide();
 }
 
 function onClickGenerateNewTerrain()
@@ -346,6 +349,11 @@ function onMouseMoveCanvas(e)
 
 function onClickCanvas(e)
 {
+   if (gameState.gameMode != 'simulation')
+   {
+      return;
+   }
+
    let canvasJq     = $('canvas');
    let canvasOffset = canvasJq.offset();
    let mouseX       = e.pageX - canvasOffset.left;
@@ -353,11 +361,7 @@ function onClickCanvas(e)
    let mouseGridX   = Math.floor(mouseX / GRID_WIDTH );
    let mouseGridY   = Math.floor(mouseY / GRID_HEIGHT);
 
-   if (gameState.gameMode == 'simulation')
-   {
-      drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
-   }
-
+   drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
    rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
 }
 
@@ -440,7 +444,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
 
    let lowerGridSquare = allResultCoords[0];
 
-   if (gameState.gameMode = 'simulation')
+   if (gameState.gameMode == 'simulation')
    {
       // Draw line from current grid square to new grid square.
       ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
