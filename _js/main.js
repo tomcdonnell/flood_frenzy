@@ -445,12 +445,13 @@ function rainUntilWaterLevelRisesByOne(rainX, rainY)
       localPoolBottomCoords = {x: rainX, y: rainY};
    }
 
-//   if (gameState.gridNumbersAreShown)
-//   {
-//      drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
-//   }
-//
-//   addWaterUpToWaterLevelRecursively
+   if (gameState.gridNumbersAreShown)
+   {
+      drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
+   }
+
+   gameState.waterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
+   addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y);
 }
 
 function findLocalLowestGridCoordsRecursively(x, y)
@@ -473,7 +474,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
    ];
 
    // For each neighbouring square...
-   for (coord of neighbourCoords)
+   for (let coord of neighbourCoords)
    {
       if
       (
@@ -522,4 +523,54 @@ function findLocalLowestGridCoordsRecursively(x, y)
 
    // Return the coordinates of the lowest neighbouring grid square.
    return findLocalLowestGridCoordsRecursively(lowerGridSquare.x, lowerGridSquare.y);
+}
+
+function addWaterUpToWaterLevelRecursively(x, y)
+{
+   if
+   (
+      // If current square exists AND
+      //    current square's height is less than the water level...
+      x >= 0 && x < GRID_WIDTH  &&
+      y >= 0 && y < GRID_HEIGHT &&
+      gameGrid[x][y].height < gameState.waterLevel
+   )
+   {
+      gameGrid[x][y].height       = gameState.waterLevel;
+      gameGrid[x][y].isUnderWater = true;
+      drawSpriteOnGridSquare(x, y, globalImages[0]);
+   }
+
+   let currentSquareHeight = gameGrid[x][y];
+   let allResultCoords     = [];
+   let neighbourCoords     =
+   [
+      {x: x - 1, y: y - 1}, // TL.
+      {x: x    , y: y - 1}, // TM.
+      {x: x + 1, y: y - 1}, // TR.
+      {x: x - 1, y: y    }, // ML.
+      {x: x + 1, y: y    }, // MR.
+      {x: x - 1, y: y + 1}, // BL.
+      {x: x    , y: y + 1}, // BM.
+      {x: x + 1, y: y + 1}  // BR.
+   ];
+
+   for (let coord of neighbourCoords)
+   {
+      if
+      (
+         // If that square exists AND
+         //    that square's height is less than the water level...
+         coord.x >= 0 && coord.x < GRID_WIDTH  &&
+         coord.y >= 0 && coord.y < GRID_HEIGHT &&
+         gameGrid[coord.x][coord.y].height < gameState.waterLevel
+      )
+      {
+         gameGrid[coord.x][coord.y].height       = gameState.waterLevel;
+         gameGrid[coord.x][coord.y].isUnderWater = true;
+         drawSpriteOnGridSquare(coord.x, coord.y, globalImages[0]);
+
+         addWaterUpToWaterLevelRecursively(coord.x, coord.y);
+      }
+   }
 }
