@@ -419,6 +419,7 @@ function simulateFlood()
    let rainX = getRandomInt(0, GRID_WIDTH );
    let rainY = getRandomInt(0, GRID_HEIGHT);
 
+   drawTextOnGridSquare(rainX, rainY, 'R');
    rainUntilWaterLevelRisesByOne(rainX, rainY);
 }
 
