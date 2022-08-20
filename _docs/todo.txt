@@ -1,0 +1,30 @@
+TODO
+----
+ * Add houses
+ * Count houses at end of each round
+ * Scoring
+ * Information page (with links to data sources)
+ * High scores page
+ * Between rounds quips
+   [
+      [
+         ['mayor'    , 'Just how big are these floods going to be Professor?'],
+         ['professor', 'This will be a Category 9 Mega-Storm.  We've never been a stom above category 6.']
+      ],
+      [
+         ['mayor'  , 'I thought you said your Wall Builder was the best?'],
+         ['general', 'I was telling you what he told me!']
+      ],
+   ]
+
+ * IMPORTANT
+    * Upload game to server
+    * Write project description
+    * Video
+
+For Arran
+---------
+ * Professor/Scientist image
+ * Title in pixel-art 'Flood Frenzy'
+ * Improve transitions between color grid squares
+  

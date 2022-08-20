@@ -10,6 +10,11 @@
    font-family: verdana;
 }
 
+body
+{
+   width: 1050px;
+}
+
 div.buttons-div
 {
    margin-bottom: 10px;
@@ -38,15 +43,19 @@ div.color-key-div span.height-number-span
 div.game-mode-div
 {
    margin-bottom: 10px;
+   width: 1045px;
 }
 
 div.game-mode-div > label
 {
+   background-color: #ccf;
    border: 1px solid black;
    display: inline-block;
    padding: 5px;
+   margin-left: 0;
+   margin-right: 0;
    text-align: center;
-   width: 200px;
+   width: 23%;
 }
 
 div.game-mode-div > label.selected
@@ -60,7 +69,7 @@ div.game-mode-round-start-popup
 {
    background-color: white;
    border: 10px solid black;
-   left: 50px;
+   left: 85px;
    padding: 20px;
    position: absolute;
    text-align: right;
@@ -106,12 +115,20 @@ div.game-mode-round-start-popup > ul > li
   <h1>Flood Frenzy - GovHack 2022</h1>
   <div class='game-mode-div'>
    <label for='game-mode-button' class='selected' onclick='onClickGameModeButton()'>
-    Game Mode<br/>
+    Game<br/>
     <input id='game-mode-button' type='radio' name='gameMode' value='simulation'/>
    </label>
    <label for='simulation-mode-button' onclick='onClickSimulationModeButton()'>
-    Simulation Mode<br/>
+    Simulation<br/>
     <input id='simulation-mode-button' type='radio' name='gameMode' value='simulation'/>
+   </label>
+   <label for='information-button' onclick='onClickInformationButton()'>
+    Information<br/>
+    <input id='information-button' type='radio' name='gameMode' value='information'/>
+   </label>
+   <label for='high-scores-button' onclick='onClickHighScoresButton()'>
+    High Scores<br/>
+    <input id='high-scores-button' type='radio' name='gameMode' value='high-scores'/>
    </label>
   </div>
   <p class='simulation-instructions' style='display:none'>
