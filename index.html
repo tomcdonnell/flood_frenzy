@@ -46,6 +46,14 @@ div.game-mode-div > label.selected
    background-color: rgb(0, 0, 200);
    color: white;
 }
+
+div.game-mode-start-sequence-popup > p
+{
+   position: relative;
+   bottom: 160px;
+   left: 245px;
+   line-height: 30px;
+}
   </style>
  </head>
  <body>
@@ -63,13 +71,6 @@ div.game-mode-div > label.selected
   <p class='simulation-instructions' style='display:none'>
    Play with the buttons below, or click on any grid square to simulate rain falling on that square.
   </p>
-  <p class='game-instructions'>
-   Floods are coming!
-   Build walls to protect houses from the flood.
-   The flood will start in a random square.<br/>
-   The water level will rise above the level of the lowest house.
-   Save as many houses as you can in ten rounds.
-  </p>
   <div class='buttons-div game'>
    <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>
    <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
@@ -85,6 +86,38 @@ div.game-mode-div > label.selected
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.
   </canvas>
+  <div class='game-mode-start-sequence-popup first'>
+   <img src='_images/27 mayor face.png' height='168'/>
+   <img src='_images/28 speech bubble.png' height='168' width='600'/>
+   <p>There's a hundred year flood coming.<br/.We need help to protect our homes.</p>
+  </div>
+  <div class='game-mode-start-sequence-popup second'>
+   <img src='_images/25 army commander.png' height='168'/>
+   <img src='_images/28 speech bubble.png' height='168' width='600'/>
+   <p>Hundred year flood eh?<br/>We've seen a few of those lately.</p>
+  </div>
+  <div class='game-mode-start-sequence-popup third'>
+   <img src='_images/27 mayor face.png' height='168'/>
+   <img src='_images/28 speech bubble.png' height='168' width='600'/>
+   <p>
+    This time will be worse than before.<br/>
+    You'll have ten regions to protect.<br/>The floods will come thick and fast.
+   </p>
+  </div>
+  <div class='game-mode-start-sequence-popup third'>
+   <img src='_images/27 mayor face.png' height='168'/>
+   <img src='_images/28 speech bubble.png' height='168' width='600'/>
+   <p>
+    Click and drag your mouse on the map to build walls.<br/>
+    Position your walls to protect houses before the floods arrive.<br/>
+    And be careful not to run out of materials.
+   </p>
+  </div>
+  <div class='game-mode-start-sequence-popup fourth'>
+   <img src='_images/25 army commander.png' height='168'/>
+   <img src='_images/28 speech bubble.png' height='168' width='600'/>
+   <p>I know the drill Mr Mayor.<br/>You can count on me.</p>
+  </div>
   <script src='_js/main.js'></script>
  </body>
 </html>

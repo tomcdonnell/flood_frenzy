@@ -257,10 +257,12 @@ function onClickGameModeButton()
    $('input#simulation-mode-button').closest('label').removeClass('selected');
    $('input#game-mode-button'      ).closest('label').addClass('selected');
    $('p.simulation-instructions'   ).hide();
-   $('p.game-instructions'         ).show();
 
    gameState.wallBudget = INITIAL_WALL_BUDGET;
    $('span.wall-budget').html(gameState.wallBudget);
+
+   $('game-mode-start-sequence-popup'      ).hide();
+   $('game-mode-start-sequence-popup.first').show();
 }
 
 function onClickSimulationModeButton()
@@ -270,10 +272,11 @@ function onClickSimulationModeButton()
    $('input#simulation-mode-button').closest('label').addClass('selected');
    $('input#game-mode-button'      ).closest('label').removeClass('selected');
    $('p.simulation-instructions'   ).show();
-   $('p.game-instructions'         ).hide();
 
    gameState.wallBudget = INITIAL_WALL_BUDGET * 10;
    $('span.wall-budget').html(gameState.wallBudget);
+
+   $('game-mode-start-sequence-popup').hide();
 }
 
 function onClickGenerateNewTerrain()
