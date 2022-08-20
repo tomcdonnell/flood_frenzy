@@ -128,7 +128,7 @@ function main(images)
    $('span.wall-budget').html(gameState.wallBudget);
 }
 
-// Functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Initialisation functions. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function initialiseGameGrid()
 {
@@ -181,9 +181,6 @@ function drawGameGrid(boolDrawHeightNumbersOnSquares)
       }
    }
 }
-
-function drawSpriteOnGridSquare(x, y, image) {ctx.drawImage(image, x * SPRITE_WIDTH, y * SPRITE_HEIGHT)   ;}
-function drawTextOnGridSquare(x, y, text)    {printTextOnCanvas(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, text);}
 
 function generateTerrainGrid()
 {
@@ -251,121 +248,45 @@ function generateTerrainGrid()
    return terrainGrid;
 }
 
-/*
- * Get a random number in range [low, high).
- */
-function getRandomInt(low, high)
+// Event handlers. ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function onClickGameModeButton()
 {
-   return low + Math.floor(Math.random() * (high - low))
+   $('div.buttons-div.simulation'  ).hide();
+   $('div.buttons-div.game'        ).show();
+   $('input#simulation-mode-button').closest('label').removeClass('selected');
+   $('input#game-mode-button'      ).closest('label').addClass('selected');
+   $('p.simulation-instructions'   ).hide();
+   $('p.game-instructions'         ).show();
+
+   gameState.wallBudget = INITIAL_WALL_BUDGET;
+   $('span.wall-budget').html(gameState.wallBudget);
 }
 
-function loadImage(url)
+function onClickSimulationModeButton()
 {
-   return new Promise
-   (
-      (fulfill, reject) =>
-      {
-         let imageObj = new Image();
-         imageObj.onload = () => fulfill(imageObj);
-         imageObj.src = url;
-      }
-   );
+   $('div.buttons-div.simulation'  ).show();
+   $('div.buttons-div.game'        ).hide();
+   $('input#simulation-mode-button').closest('label').addClass('selected');
+   $('input#game-mode-button'      ).closest('label').removeClass('selected');
+   $('p.simulation-instructions'   ).show();
+   $('p.game-instructions'         ).hide();
+
+   gameState.wallBudget = INITIAL_WALL_BUDGET * 10;
+   $('span.wall-budget').html(gameState.wallBudget);
 }
 
-/*
- * Draw the supplied text at the supplied position.
- */
-function printTextOnCanvas(x, y, text)
-{
-   ctx.fillStyle = 'rgb(0, 0, 200)';
-   ctx.font      = 'bold 16px Arial';
-   ctx.fillText(text, x + 10, y + 22);
-}
-
-function getAvgHeightOfSurroundingSquares(x, y)
-{
-   let n   = 0;
-   let sum = 0;
-
-   if (y > 0               && x > 0             ) {sum += Number(terrainGrid[x - 1][y - 1]); ++n;} // top-left.
-   if (y > 0                                    ) {sum += Number(terrainGrid[x    ][y - 1]); ++n;} // top-middle.
-   if (y > 0               && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y - 1]); ++n;} // top-right.
-
-   if (                       x > 0             ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
-   if (                       x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
-
-   if (y < GRID_HEIGHT - 1 && x > 0             ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
-   if (y < GRID_HEIGHT - 1                      ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
-   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
-
-   return ((n > 0)? Math.floor(sum / n): 0);
-}
-
-function getHeightOfHighestNeighbour(x, y)
-{
-   let highestH = 0;
-
-   if (y > 0               && x > 0             ) {let h = Number(terrainGrid[x - 1][y - 1]); if (h > highestH) {highestH = h;}} // top-left.
-   if (y > 0                                    ) {let h = Number(terrainGrid[x    ][y - 1]); if (h > highestH) {highestH = h;}} // top-middle.
-   if (y > 0               && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y - 1]); if (h > highestH) {highestH = h;}} // top-right.
-
-   if (                       x > 0             ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
-   if (                       x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
-
-   if (y < GRID_HEIGHT - 1 && x > 0             ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
-   if (y < GRID_HEIGHT - 1                      ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
-   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
-
-   return highestH;
-}
-
-function terrainSquareHasNonNullNeighbour(x, y)
-{
-   let highestH = 0;
-
-   if (y > 0               && x > 0             ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
-   if (y > 0                                    ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
-   if (y > 0               && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
-
-   if (                       x > 0             ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
-   if (                       x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
-
-   if (y < GRID_HEIGHT - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
-   if (y < GRID_HEIGHT - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
-   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
-
-   return false;
-}
-
-function copyArray(terrainGrid)
-{
-   let newTerrainGrid = [];
-
-   for (let x = 0; x < terrainGrid.length; ++x)
-   {
-      newTerrainGrid[x] = [];
-
-      for (let y = 0; y < terrainGrid[x].length; ++y)
-      {
-         newTerrainGrid[x][y] = terrainGrid[x][y];
-      }
-   }
-
-   return newTerrainGrid;
-}
-
-function generateNewTerrain()
+function onClickGenerateNewTerrain()
 {
    initialiseGameGrid();
 
    drawGameGrid(gameState.gridNumbersAreShown); // Initially draw the grid without the numbers.
 
    gameState.wallBudget = INITIAL_WALL_BUDGET;
-
    $('span.wall-budget').html(gameState.wallBudget);
 }
 
-function toggleHeightNumbers()
+function onClickToggleHeightNumbers()
 {
    let gridNumbersAreShown = gameState.gridNumbersAreShown;
 
@@ -420,20 +341,6 @@ function onMouseMoveCanvas(e)
    }
 }
 
-function simulateFlood()
-{
-   // Choose a random grid square from which rain will fall.
-   let rainX = getRandomInt(0, GRID_WIDTH );
-   let rainY = getRandomInt(0, GRID_HEIGHT);
-
-   if (gameState.gameMode == 'simulation')
-   {
-      drawTextOnGridSquare(rainX, rainY, 'R');
-   }
-
-   rainUntilWaterLevelRisesByOne(rainX, rainY);
-}
-
 function onClickCanvas(e)
 {
    let canvasJq     = $('canvas');
@@ -450,6 +357,8 @@ function onClickCanvas(e)
 
    rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
 }
+
+// Flood functions. //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function rainUntilWaterLevelRisesByOne(rainX, rainY)
 {
@@ -591,3 +500,112 @@ function addWaterUpToWaterLevelRecursively(x, y)
       }
    }
 }
+
+// Utility functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getAvgHeightOfSurroundingSquares(x, y)
+{
+   let n   = 0;
+   let sum = 0;
+
+   if (y > 0               && x > 0             ) {sum += Number(terrainGrid[x - 1][y - 1]); ++n;} // top-left.
+   if (y > 0                                    ) {sum += Number(terrainGrid[x    ][y - 1]); ++n;} // top-middle.
+   if (y > 0               && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y - 1]); ++n;} // top-right.
+
+   if (                       x > 0             ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
+   if (                       x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
+
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
+
+   return ((n > 0)? Math.floor(sum / n): 0);
+}
+
+function getHeightOfHighestNeighbour(x, y)
+{
+   let highestH = 0;
+
+   if (y > 0               && x > 0             ) {let h = Number(terrainGrid[x - 1][y - 1]); if (h > highestH) {highestH = h;}} // top-left.
+   if (y > 0                                    ) {let h = Number(terrainGrid[x    ][y - 1]); if (h > highestH) {highestH = h;}} // top-middle.
+   if (y > 0               && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y - 1]); if (h > highestH) {highestH = h;}} // top-right.
+
+   if (                       x > 0             ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
+   if (                       x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
+
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
+
+   return highestH;
+}
+
+function terrainSquareHasNonNullNeighbour(x, y)
+{
+   let highestH = 0;
+
+   if (y > 0               && x > 0             ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
+   if (y > 0                                    ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
+   if (y > 0               && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
+
+   if (                       x > 0             ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
+   if (                       x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
+
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
+
+   return false;
+}
+
+function loadImage(url)
+{
+   return new Promise
+   (
+      (fulfill, reject) =>
+      {
+         let imageObj = new Image();
+         imageObj.onload = () => fulfill(imageObj);
+         imageObj.src = url;
+      }
+   );
+}
+
+function copyArray(terrainGrid)
+{
+   let newTerrainGrid = [];
+
+   for (let x = 0; x < terrainGrid.length; ++x)
+   {
+      newTerrainGrid[x] = [];
+
+      for (let y = 0; y < terrainGrid[x].length; ++y)
+      {
+         newTerrainGrid[x][y] = terrainGrid[x][y];
+      }
+   }
+
+   return newTerrainGrid;
+}
+
+/*
+ * Draw the supplied text at the supplied position.
+ */
+function printTextOnCanvas(x, y, text)
+{
+   ctx.fillStyle = 'rgb(0, 0, 200)';
+   ctx.font      = 'bold 16px Arial';
+   ctx.fillText(text, x + 10, y + 22);
+}
+
+/*
+ * Get a random number in range [low, high).
+ */
+function getRandomInt(low, high)
+{
+   return low + Math.floor(Math.random() * (high - low))
+}
+
+function drawSpriteOnGridSquare(x, y, image) {ctx.drawImage(image, x * SPRITE_WIDTH, y * SPRITE_HEIGHT)   ;}
+function drawTextOnGridSquare(x, y, text)    {printTextOnCanvas(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, text);}
+

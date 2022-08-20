@@ -31,25 +31,56 @@ div.color-key-div span.height-number-span
    left: 26px;
    bottom: 10px;
 }
+
+div.game-mode-div > label
+{
+   border: 1px solid black;
+   display: inline-block;
+   padding: 5px;
+   text-align: center;
+   width: 200px;
+}
+
+div.game-mode-div > label.selected
+{
+   background-color: rgb(0, 0, 200);
+   color: white;
+}
   </style>
  </head>
  <body>
   <h1>Flood Frenzy - GovHack 2022</h1>
-  <p>
+  <div class='game-mode-div'>
+   <label for='game-mode-button' class='selected' onclick='onClickGameModeButton()'>
+    Game Mode<br/>
+    <input id='game-mode-button' type='radio' name='gameMode' value='simulation'/>
+   </label>
+   <label for='simulation-mode-button' onclick='onClickSimulationModeButton()'>
+    Simulation Mode<br/>
+    <input id='simulation-mode-button' type='radio' name='gameMode' value='simulation'/>
+   </label>
+  </div>
+  <p class='simulation-instructions' style='display:none'>
+   Play with the buttons below, or click on any grid square to simulate rain falling on that square.
+  </p>
+  <p class='game-instructions'>
    Floods are coming!
    Build walls to protect houses from the flood.
    The flood will start in a random square.<br/>
    The water level will rise above the level of the lowest house.
    Save as many houses as you can in ten rounds.
   </p>
+  <div class='buttons-div game'>
+   <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>
+   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
+  </div>
+  <div class='buttons-div simulation' style='display:none'>
+   <button onclick='onClickGenerateNewTerrain()'>Generate new terrain</button>
+   <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
+   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
+  </div>
   <div class='color-key-div'>
    <div>Terrain height color key:</div>
-  </div>
-  <div class='buttons-div'>
-   <button onclick='generateNewTerrain()'>Generate new terrain</button>
-   <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>
-   <button onclick='simulateFlood()'>Simulate flood</button>
-   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
   </div>
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.
