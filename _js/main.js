@@ -466,6 +466,15 @@ function findLocalLowestGridCoordsRecursively(x, y)
       }
    );
 
+   let lowerGridSquare = allResultCoords[0];
+
+   // Draw line from current grid square to new grid square.
+   ctx.strokeStyle = 'rgb(255, 0, 0)'; // Set draw colour to red.
+   ctx.beginPath();                    // Start a path that will later be drawn.
+   ctx.moveTo(x                 * GRID_WIDTH + 16, y                 * GRID_HEIGHT + 16);
+   ctx.lineTo(lowerGridSquare.x * GRID_WIDTH + 16, lowerGridSquare.y * GRID_HEIGHT + 16);
+   ctx.stroke();
+
    // Return the coordinates of the lowest neighbouring grid square.
-   return findLocalLowestGridCoordsRecursively(allResultCoords[0].x, allResultCoords[0].y);
+   return findLocalLowestGridCoordsRecursively(lowerGridSquare.x, lowerGridSquare.y);
 }
