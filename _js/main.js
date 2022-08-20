@@ -4,8 +4,8 @@
 
 const ctx = document.getElementById('canvas').getContext('2d');
 
-ctx.canvas.width  = 1055;
-ctx.canvas.height = 1055;
+ctx.canvas.width  = 1022;
+ctx.canvas.height = 1022;
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,8 @@ function main(images)
 {
    initialiseGameGrid();
 
-   drawGameGrid(images, true);
+//   drawGameGrid(images, true);
+   drawGameGrid(images, false);
 }
 
 // Functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ function drawGameGrid(images, boolDrawHeightNumbersOnSquares)
 
          let imageForGridSquare = images[gridSquareObj.height];
 
-         ctx.drawImage(imageForGridSquare, x * (SPRITE_WIDTH + 1), y * (SPRITE_HEIGHT + 1));
+         ctx.drawImage(imageForGridSquare, x * SPRITE_WIDTH, y * SPRITE_HEIGHT);
 
          if (boolDrawHeightNumbersOnSquares)
          {
