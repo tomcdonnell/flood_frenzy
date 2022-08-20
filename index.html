@@ -5,6 +5,11 @@
   <title>GovHack 2022</title>
   <script type='text/javascript' src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
   <style>
+*
+{
+   font-family: verdana;
+}
+
 div.buttons-div
 {
    margin-bottom: 10px;
@@ -17,6 +22,15 @@ span.wall-budget-container
    padding: 2px;
    background-color: #eee;
 }
+
+div.color-key-div span.height-number-span
+{
+   color: red;
+   font-weight: bold;
+   position: relative;
+   left: 26px;
+   bottom: 10px;
+}
   </style>
  </head>
  <body>
@@ -28,6 +42,9 @@ span.wall-budget-container
    The water level will rise above the level of the lowest house.
    Save as many houses as you can in ten rounds.
   </p>
+  <div class='color-key-div'>
+   <div>Terrain height color key:</div>
+  </div>
   <div class='buttons-div'>
    <button onclick='generateNewTerrain()'>Generate new terrain</button>
    <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>

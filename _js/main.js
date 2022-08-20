@@ -24,30 +24,57 @@ let terrainGrid               = [];
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+let imageFilenames =
+[
+   '_images/01 deep water layer.png',
+   '_images/02 shallow water layer.png',
+   '_images/03 light sand layer.png',
+   '_images/04 darker sand layer.png',
+   '_images/05 darkest sand layer.png',
+   '_images/06 grass lightest layer.png',
+   '_images/07 grass dark layer.png',
+   '_images/08 grass darker layer.png',
+   '_images/09 grass darkest layer.png',
+   '_images/10 dirt light layer.png',
+   '_images/11 dirt dark layer.png',
+   '_images/12 dirt darkest layer.png',
+   '_images/13 rock light layer.png',
+   '_images/14 rock dark layer.png',
+   '_images/15 rock darker layer.png',
+   '_images/16 rock darkest layer.png',
+   '_images/17 rock darkest realy small snow layer.png',
+   '_images/18 rock darkest small snow layer.png',
+   '_images/19 rock darkest half snow layer.png',
+   '_images/20 pure snow layer.png',
+   '_images/21 flood barrier.png',
+   '_images/22 house transparent.png'
+];
+
 Promise.all
 (
    [
-      loadImage('_images/01 deep water layer.png'),
-      loadImage('_images/02 shallow water layer.png'),
-      loadImage('_images/03 light sand layer.png'),
-      loadImage('_images/04 darker sand layer.png'),
-      loadImage('_images/05 darkest sand layer.png'),
-      loadImage('_images/06 grass lightest layer.png'),
-      loadImage('_images/07 grass dark layer.png'),
-      loadImage('_images/08 grass darker layer.png'),
-      loadImage('_images/09 grass darkest layer.png'),
-      loadImage('_images/10 dirt light layer.png'),
-      loadImage('_images/11 dirt dark layer.png'),
-      loadImage('_images/12 dirt darkest layer.png'),
-      loadImage('_images/13 rock light layer.png'),
-      loadImage('_images/14 rock dark layer.png'),
-      loadImage('_images/15 rock darker layer.png'),
-      loadImage('_images/16 rock darkest layer.png'),
-      loadImage('_images/17 rock darkest realy small snow layer.png'),
-      loadImage('_images/18 rock darkest small snow layer.png'),
-      loadImage('_images/19 rock darkest half snow layer.png'),
-      loadImage('_images/20 pure snow layer.png'),
-      loadImage('_images/21 flood barrier.png')
+      loadImage(imageFilenames[0]),
+      loadImage(imageFilenames[1]),
+      loadImage(imageFilenames[2]),
+      loadImage(imageFilenames[3]),
+      loadImage(imageFilenames[4]),
+      loadImage(imageFilenames[5]),
+      loadImage(imageFilenames[6]),
+      loadImage(imageFilenames[7]),
+      loadImage(imageFilenames[8]),
+      loadImage(imageFilenames[9]),
+      loadImage(imageFilenames[10]),
+      loadImage(imageFilenames[11]),
+      loadImage(imageFilenames[12]),
+      loadImage(imageFilenames[13]),
+      loadImage(imageFilenames[14]),
+      loadImage(imageFilenames[15]),
+      loadImage(imageFilenames[16]),
+      loadImage(imageFilenames[17]),
+      loadImage(imageFilenames[18]),
+      loadImage(imageFilenames[19]),
+      loadImage(imageFilenames[20]),
+      loadImage(imageFilenames[21])
    ]
 )
 .then
@@ -80,6 +107,12 @@ function main(images)
       }
    }
    gameState.waterLevel = lowestHeight;
+
+   // Add images to color-key.
+   for (let i = 0; i < 20; ++i)
+   {
+      $('div.color-key-div').append("<span><span class='height-number-span'>" + i + "</span><img src='" + imageFilenames[i] + "'/></span>");
+   }
 
 
    $('canvas').click(onClickCanvas);
@@ -319,6 +352,10 @@ function generateNewTerrain()
    initialiseGameGrid();
 
    drawGameGrid(gameState.gridNumbersAreShown); // Initially draw the grid without the numbers.
+
+   gameState.wallBudget = INITIAL_WALL_BUDGET;
+
+   $('span.wall-budget').html(gameState.wallBudget);
 }
 
 function toggleHeightNumbers()
@@ -400,18 +437,20 @@ function onClickCanvas(e)
 function rainUntilWaterLevelRisesByOne(rainX, rainY)
 {
    globalCoordsVisitedAsKeys = {}; // Clear this before calling recursive function.
-   let gridCoords = findLocalLowestGridCoordsRecursively(rainX, rainY);
+   let localPoolBottomCoords = findLocalLowestGridCoordsRecursively(rainX, rainY);
 
-   if (gridCoords === null)
+   if (localPoolBottomCoords === null)
    {
       // Grid coords returned being null means the submitted coords are a local minimum.
-      gridCoords = {x: rainX, y: rainY};
+      localPoolBottomCoords = {x: rainX, y: rainY};
    }
 
-   if (gameState.gridNumbersAreShown)
-   {
-      drawTextOnGridSquare(gridCoords.x, gridCoords.y, 'M'); // Mark local minima.
-   }
+//   if (gameState.gridNumbersAreShown)
+//   {
+//      drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
+//   }
+//
+//   addWaterUpToWaterLevelRecursively
 }
 
 function findLocalLowestGridCoordsRecursively(x, y)
