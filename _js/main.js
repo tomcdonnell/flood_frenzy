@@ -16,10 +16,11 @@ const SPRITE_WIDTH        =  32;
 const MAX_TERRAIN_HEIGHT  =  20;
 const INITIAL_WALL_BUDGET = 100;
 
-let globalImages = [];
-let gameState    = {gridNumbersAreShown: false, isBuildingWalls: false, wallBudget: INITIAL_WALL_BUDGET};
-let gameGrid     = [];
-let terrainGrid  = [];
+let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
+let globalImages              = [];
+let gameState                 = {gridNumbersAreShown: false, isBuildingWalls: false, wallBudget: INITIAL_WALL_BUDGET, waterLevel: null};
+let gameGrid                  = [];
+let terrainGrid               = [];
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,6 +66,23 @@ function main(images)
    initialiseGameGrid();
 
    drawGameGrid(false); // Initially draw the grid without the numbers.
+
+   // Set water level to be the lowest height on the grid.
+   let lowestHeight = 999;
+   for (let x = 0; x < GRID_WIDTH; ++x)
+   {
+      for (let y = 0; y < GRID_HEIGHT; ++y)
+      {
+         if (gameGrid[x][y].height < lowestHeight)
+         {
+            lowestHeight = gameGrid[x][y].height;
+         }
+      }
+   }
+   gameState.waterLevel = lowestHeight;
+
+
+   $('canvas').click(onClickCanvas);
 
    $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
    $('span.wall-budget').html(gameState.wallBudget);
@@ -139,9 +157,9 @@ function generateTerrainGrid()
       }
    }
 
-   // Choose five random squares to be mountain tops.
+   // Choose six random squares to be mountain tops.
    // If the mountain tops happen to be on the same squares, that is no problem.
-   for (let i = 0; i < 5; ++i)
+   for (let i = 0; i < 6; ++i)
    {
       let mountainTopX   = getRandomInt(0, GRID_WIDTH );
       let mountainTopY   = getRandomInt(0, GRID_HEIGHT);
@@ -163,7 +181,7 @@ function generateTerrainGrid()
             {
                // Fill in empty terrain square depending on height of surrounding squares.
                let heightOfHighestNeighbour = getHeightOfHighestNeighbour(x, y);
-               let randomDecrement          = getRandomInt(1, 3);
+               let randomDecrement          = getRandomInt(1, 4);
                let newHeight                = ((heightOfHighestNeighbour > randomDecrement)? heightOfHighestNeighbour - randomDecrement: 0);
 
                tempTerrainGrid[x][y] = newHeight;
@@ -283,11 +301,11 @@ function copyArray(terrainGrid)
 {
    let newTerrainGrid = [];
 
-   for (let x = 0; x < GRID_WIDTH; ++x)
+   for (let x = 0; x < terrainGrid.length; ++x)
    {
       newTerrainGrid[x] = [];
 
-      for (let y = 0; y < GRID_HEIGHT; ++y)
+      for (let y = 0; y < terrainGrid[x].length; ++y)
       {
          newTerrainGrid[x][y] = terrainGrid[x][y];
       }
@@ -310,10 +328,6 @@ function toggleHeightNumbers()
    drawGameGrid(!gameState.gridNumbersAreShown);
 
    gameState.gridNumbersAreShown = !gameState.gridNumbersAreShown;
-}
-
-function simulateFlood()
-{
 }
 
 function onMouseUpCanvas(e)
@@ -360,4 +374,98 @@ function onMouseMoveCanvas(e)
          }
       }
    }
+}
+
+function simulateFlood()
+{
+   // Choose a random grid square from which rain will fall.
+   let rainX = getRandomInt(0, GRID_WIDTH );
+   let rainY = getRandomInt(0, GRID_HEIGHT);
+
+   rainUntilWaterLevelRisesByOne(rainX, rainY);
+}
+
+function onClickCanvas(e)
+{
+   let canvasJq     = $('canvas');
+   let canvasOffset = canvasJq.offset();
+   let mouseX       = e.pageX - canvasOffset.left;
+   let mouseY       = e.pageY - canvasOffset.top;
+   let mouseGridX   = Math.floor(mouseX / GRID_WIDTH );
+   let mouseGridY   = Math.floor(mouseY / GRID_HEIGHT);
+
+   rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
+}
+
+function rainUntilWaterLevelRisesByOne(rainX, rainY)
+{
+   globalCoordsVisitedAsKeys = {}; // Clear this before calling recursive function.
+   let gridCoords = findLocalLowestGridCoordsRecursively(rainX, rainY);
+
+   if (gridCoords === null)
+   {
+      // Grid coords returned being null means the submitted coords are a local minimum.
+      gridCoords = {x: rainX, y: rainY};
+   }
+
+   drawTextOnGridSquare(gridCoords.x, gridCoords.y, 'M'); // Mark local minima.
+}
+
+function findLocalLowestGridCoordsRecursively(x, y)
+{
+   globalCoordsVisitedAsKeys['x:' + x + ',' + y] = true;
+
+   // Collect all the results so we can filter and sort them.
+   let currentSquareHeight = gameGrid[x][y];
+   let allResultCoords     = [];
+   let neighbourCoords     =
+   [
+      {x: x - 1, y: y - 1}, // TL.
+      {x: x    , y: y - 1}, // TM.
+      {x: x + 1, y: y - 1}, // TR.
+      {x: x - 1, y: y    }, // ML.
+      {x: x + 1, y: y    }, // MR.
+      {x: x - 1, y: y + 1}, // BL.
+      {x: x    , y: y + 1}, // BM.
+      {x: x + 1, y: y + 1}  // BR.
+   ];
+
+   // For each neighbouring square...
+   for (coord of neighbourCoords)
+   {
+      if
+      (
+         // If that square exists AND
+         //    that square's height is less than or equal to the current square's height AND
+         //    we have not visited that square before...
+         coord.x >= 0 && coord.x < GRID_WIDTH  &&
+         coord.y >= 0 && coord.y < GRID_HEIGHT &&
+         gameGrid[coord.x][coord.y].height <= gameGrid[x][y].height &&
+         globalCoordsVisitedAsKeys['x:' + coord.x + ',' + coord.y] === undefined
+      )
+      {
+         // Find the lowest local grid coords from that square.
+         allResultCoords.push(coord);
+      }
+   }
+
+   if (allResultCoords.length == 0)
+   {
+      // None of the neighbouring squares is lower, so return the given coordinates.
+      return {x: x, y: y};
+   }
+
+   // Sort by height ascending.
+   allResultCoords.sort
+   (
+      function compare(a, b)
+      {
+         let aHeight = gameGrid[a.x][a.y].height;
+         let bHeight = gameGrid[b.x][b.y].height;
+         return ((aHeight === bHeight)? 0: ((aHeight > bHeight)? 1: -1));
+      }
+   );
+
+   // Return the coordinates of the lowest neighbouring grid square.
+   return findLocalLowestGridCoordsRecursively(allResultCoords[0].x, allResultCoords[0].y);
 }
