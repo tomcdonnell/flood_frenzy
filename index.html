@@ -3,9 +3,37 @@
  <head>
   <meta charset='UTF-8'>
   <title>GovHack 2022</title>
+  <script type='text/javascript' src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
+  <style>
+div.buttons-div
+{
+   margin-bottom: 10px;
+}
+
+span.wall-budget-container
+{
+   border: 1px solid black;
+   display: inline-block;
+   padding: 2px;
+   background-color: #eee;
+}
+  </style>
  </head>
  <body>
   <h1>Flood Frenzy - GovHack 2022</h1>
+  <p>
+   Floods are coming!
+   Build walls to protect houses from the flood.
+   The flood will start in a random square.<br/>
+   The water level will rise above the level of the lowest house.
+   Save as many houses as you can in ten rounds.
+  </p>
+  <div class='buttons-div'>
+   <button onclick='generateNewTerrain()'>Generate new terrain</button>
+   <button onclick='toggleHeightNumbers()'>Toggle height numbers</button>
+   <button onclick='simulateFlood()'>Simulate flood</button>
+   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
+  </div>
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.
   </canvas>

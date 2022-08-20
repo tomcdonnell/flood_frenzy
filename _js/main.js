@@ -9,14 +9,17 @@ ctx.canvas.height = 1022;
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let gameGrid    = [];
-let terrainGrid = [];
+const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
+const GRID_WIDTH          =  32; // Horizontal dimension on screen.
+const SPRITE_HEIGHT       =  32;
+const SPRITE_WIDTH        =  32;
+const MAX_TERRAIN_HEIGHT  =  20;
+const INITIAL_WALL_BUDGET = 100;
 
-const GRID_LENGTH        = 32; // Vertical   dimension on screen.
-const GRID_WIDTH         = 32; // Horizontal dimension on screen.
-const SPRITE_HEIGHT      = 32;
-const SPRITE_WIDTH       = 32;
-const MAX_TERRAIN_HEIGHT = 20;
+let globalImages = [];
+let gameState    = {gridNumbersAreShown: false, isBuildingWalls: false, wallBudget: INITIAL_WALL_BUDGET};
+let gameGrid     = [];
+let terrainGrid  = [];
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +45,8 @@ Promise.all
       loadImage('_images/17 rock darkest realy small snow layer.png'),
       loadImage('_images/18 rock darkest small snow layer.png'),
       loadImage('_images/19 rock darkest half snow layer.png'),
-      loadImage('_images/20 pure snow layer.png')
+      loadImage('_images/20 pure snow layer.png'),
+      loadImage('_images/21 flood barrier.png')
    ]
 )
 .then
@@ -56,10 +60,14 @@ Promise.all
  */
 function main(images)
 {
+   globalImages = images;
+
    initialiseGameGrid();
 
-//   drawGameGrid(images, true);
-   drawGameGrid(images, false);
+   drawGameGrid(false); // Initially draw the grid without the numbers.
+
+   $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
+   $('span.wall-budget').html(gameState.wallBudget);
 }
 
 // Functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,20 +80,25 @@ function initialiseGameGrid()
    {
       gameGrid[x] = [];
 
-      for (let y = 0; y < GRID_LENGTH; ++y)
+      for (let y = 0; y < GRID_HEIGHT; ++y)
       {
          let gridSquareHeight = terrainGrid[x][y];
 
-         gameGrid[x][y] = {height: gridSquareHeight, isUnderwater: (gridSquareHeight < 10)}
+         gameGrid[x][y] =
+         {
+            height      : gridSquareHeight,
+            isUnderwater: (gridSquareHeight < 10),
+            isWall      : false
+         }
       }
    }
 }
 
-function drawGameGrid(images, boolDrawHeightNumbersOnSquares)
+function drawGameGrid(boolDrawHeightNumbersOnSquares)
 {
    for (let x = 0; x < GRID_WIDTH; ++x)
    {
-      for (let y = 0; y < GRID_LENGTH; ++y)
+      for (let y = 0; y < GRID_HEIGHT; ++y)
       {
          let gridSquareObj = gameGrid[x][y];
 
@@ -94,17 +107,25 @@ function drawGameGrid(images, boolDrawHeightNumbersOnSquares)
             throw 'Grid square [' + x + '][' + y + '] height (' + gridSquareObj.height + ') out of expected range.';
          }
 
-         let imageForGridSquare = images[gridSquareObj.height];
+         let imageForGridSquare =
+         (
+            (gridSquareObj.isWall)?
+            globalImages[20]:
+            globalImages[gridSquareObj.height]
+         );
 
-         ctx.drawImage(imageForGridSquare, x * SPRITE_WIDTH, y * SPRITE_HEIGHT);
+         drawSpriteOnGridSquare(x, y, imageForGridSquare);
 
          if (boolDrawHeightNumbersOnSquares)
          {
-            printTextOnCanvas(x * (SPRITE_WIDTH + 1), y * (SPRITE_HEIGHT + 1), gridSquareObj.height);
+            drawTextOnGridSquare(x, y, gridSquareObj.height);
          }
       }
    }
 }
+
+function drawSpriteOnGridSquare(x, y, image) {ctx.drawImage(image, x * SPRITE_WIDTH, y * SPRITE_HEIGHT)   ;}
+function drawTextOnGridSquare(x, y, text)    {printTextOnCanvas(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, text);}
 
 function generateTerrainGrid()
 {
@@ -112,7 +133,7 @@ function generateTerrainGrid()
    {
       terrainGrid[x] = [];
 
-      for (let y = 0; y < GRID_LENGTH; ++y)
+      for (let y = 0; y < GRID_HEIGHT; ++y)
       {
          terrainGrid[x][y] = null;
       }
@@ -123,20 +144,20 @@ function generateTerrainGrid()
    for (let i = 0; i < 5; ++i)
    {
       let mountainTopX   = getRandomInt(0, GRID_WIDTH );
-      let mountainTopY   = getRandomInt(0, GRID_LENGTH);
-      let mountainHeight = getRandomInt(15, 20);
+      let mountainTopY   = getRandomInt(0, GRID_HEIGHT);
+      let mountainHeight = getRandomInt(MAX_TERRAIN_HEIGHT - 5, MAX_TERRAIN_HEIGHT);
 
       terrainGrid[mountainTopX][mountainTopY] = mountainHeight;
    }
 
-   for (var i = 0; i < 20; ++i)
+   for (var i = 0; i < MAX_TERRAIN_HEIGHT; ++i)
    {
       let tempTerrainGrid = copyArray(terrainGrid);
 
       // Fill in terrain surrounding mountain tops.  First left->right, top->bottom.
       for (let x = 0; x < GRID_WIDTH; ++x)
       {
-         for (let y = 0; y < GRID_LENGTH; ++y)
+         for (let y = 0; y < GRID_HEIGHT; ++y)
          {
             if (terrainGrid[x][y] === null && terrainSquareHasNonNullNeighbour(x, y))
             {
@@ -160,7 +181,7 @@ function generateTerrainGrid()
    // Final pass to convert any null squares to zero.
    for (let x = 0; x < GRID_WIDTH; ++x)
    {
-      for (let y = 0; y < GRID_LENGTH; ++y)
+      for (let y = 0; y < GRID_HEIGHT; ++y)
       {
          if (terrainGrid[x][y] === null)
          {
@@ -215,9 +236,9 @@ function getAvgHeightOfSurroundingSquares(x, y)
    if (                       x > 0             ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
    if (                       x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
 
-   if (y < GRID_LENGTH - 1 && x > 0             ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
-   if (y < GRID_LENGTH - 1                      ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
-   if (y < GRID_LENGTH - 1 && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
 
    return ((n > 0)? Math.floor(sum / n): 0);
 }
@@ -233,9 +254,9 @@ function getHeightOfHighestNeighbour(x, y)
    if (                       x > 0             ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
    if (                       x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
 
-   if (y < GRID_LENGTH - 1 && x > 0             ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
-   if (y < GRID_LENGTH - 1                      ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
-   if (y < GRID_LENGTH - 1 && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
 
    return highestH;
 }
@@ -251,9 +272,9 @@ function terrainSquareHasNonNullNeighbour(x, y)
    if (                       x > 0             ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
    if (                       x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
 
-   if (y < GRID_LENGTH - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
-   if (y < GRID_LENGTH - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
-   if (y < GRID_LENGTH - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
+   if (y < GRID_HEIGHT - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
+   if (y < GRID_HEIGHT - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
+   if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
 
    return false;
 }
@@ -266,11 +287,77 @@ function copyArray(terrainGrid)
    {
       newTerrainGrid[x] = [];
 
-      for (let y = 0; y < GRID_LENGTH; ++y)
+      for (let y = 0; y < GRID_HEIGHT; ++y)
       {
          newTerrainGrid[x][y] = terrainGrid[x][y];
       }
    }
 
    return newTerrainGrid;
+}
+
+function generateNewTerrain()
+{
+   initialiseGameGrid();
+
+   drawGameGrid(gameState.gridNumbersAreShown); // Initially draw the grid without the numbers.
+}
+
+function toggleHeightNumbers()
+{
+   let gridNumbersAreShown = gameState.gridNumbersAreShown;
+
+   drawGameGrid(!gameState.gridNumbersAreShown);
+
+   gameState.gridNumbersAreShown = !gameState.gridNumbersAreShown;
+}
+
+function simulateFlood()
+{
+}
+
+function onMouseUpCanvas(e)
+{
+   gameState.isBuildingWalls = false
+   $('span.walls-budget-container').css('border-color', 'black');
+}
+
+function onMouseDownCanvas(e)
+{
+   gameState.isBuildingWalls = true;
+   $('span.walls-budget-container').css('border-color', 'red');
+}
+
+function onMouseMoveCanvas(e)
+{
+   if (gameState.isBuildingWalls && gameState.wallBudget > 0)
+   {
+      let canvasJq     = $('canvas');
+      let canvasOffset = canvasJq.offset();
+      let mouseX       = e.pageX - canvasOffset.left;
+      let mouseY       = e.pageY - canvasOffset.top;
+      let mouseGridX   = Math.floor(mouseX / GRID_WIDTH );
+      let mouseGridY   = Math.floor(mouseY / GRID_HEIGHT);
+
+      if (mouseGridX > GRID_WIDTH || mouseGridY > GRID_HEIGHT)
+      {
+         throw new Exception('Mouse grid coordinates out of expected range.');
+      }
+
+      if (gameGrid[mouseGridX][mouseGridY].height < MAX_TERRAIN_HEIGHT - 1)
+      {
+         drawSpriteOnGridSquare(mouseGridX, mouseGridY, globalImages[20]);
+         gameGrid[mouseGridX][mouseGridY].isWall  = true;
+         gameGrid[mouseGridX][mouseGridY].height += 1;
+
+         --gameState.wallBudget;
+
+         $('span.wall-budget').html(gameState.wallBudget);
+
+         if (gameState.gridNumbersAreShown)
+         {
+            drawTextOnGridSquare(mouseGridX, mouseGridY, gameGrid[mouseGridX][mouseGridY].height);
+         }
+      }
+   }
 }
