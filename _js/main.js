@@ -14,13 +14,20 @@ const GRID_WIDTH          =  32; // Horizontal dimension on screen.
 const SPRITE_HEIGHT       =  32;
 const SPRITE_WIDTH        =  32;
 const MAX_TERRAIN_HEIGHT  =  20;
-const INITIAL_WALL_BUDGET = 100;
+const INITIAL_WALL_BUDGET = 150;
 
 let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
 let globalImages              = [];
-let gameState                 = {gridNumbersAreShown: false, isBuildingWalls: false, wallBudget: INITIAL_WALL_BUDGET, waterLevel: null};
 let gameGrid                  = [];
 let terrainGrid               = [];
+let gameState                 =
+{
+   gameMode           : 'simulation', // Possible values: {'simulation', 'game'}
+   gridNumbersAreShown: false,
+   isBuildingWalls    : false,
+   wallBudget         : INITIAL_WALL_BUDGET,
+   waterLevel         : null
+};
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -270,7 +277,7 @@ function loadImage(url)
  */
 function printTextOnCanvas(x, y, text)
 {
-   ctx.fillStyle = 'rgb(255, 0, 0)';
+   ctx.fillStyle = 'rgb(0, 0, 200)';
    ctx.font      = 'bold 16px Arial';
    ctx.fillText(text, x + 10, y + 22);
 }
@@ -419,7 +426,11 @@ function simulateFlood()
    let rainX = getRandomInt(0, GRID_WIDTH );
    let rainY = getRandomInt(0, GRID_HEIGHT);
 
-   drawTextOnGridSquare(rainX, rainY, 'R');
+   if (gameState.gameMode == 'simulation')
+   {
+      drawTextOnGridSquare(rainX, rainY, 'R');
+   }
+
    rainUntilWaterLevelRisesByOne(rainX, rainY);
 }
 
@@ -431,6 +442,11 @@ function onClickCanvas(e)
    let mouseY       = e.pageY - canvasOffset.top;
    let mouseGridX   = Math.floor(mouseX / GRID_WIDTH );
    let mouseGridY   = Math.floor(mouseY / GRID_HEIGHT);
+
+   if (gameState.gameMode == 'simulation')
+   {
+      drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
+   }
 
    rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
 }
@@ -512,10 +528,10 @@ function findLocalLowestGridCoordsRecursively(x, y)
 
    let lowerGridSquare = allResultCoords[0];
 
-   if (gameState.gridNumbersAreShown)
+   if (gameState.gameMode = 'simulation')
    {
       // Draw line from current grid square to new grid square.
-      ctx.strokeStyle = 'rgb(255, 0, 0)'; // Set draw colour to red.
+      ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
       ctx.beginPath();                    // Start a path that will later be drawn.
       ctx.moveTo(x                 * GRID_WIDTH + 16, y                 * GRID_HEIGHT + 16);
       ctx.lineTo(lowerGridSquare.x * GRID_WIDTH + 16, lowerGridSquare.y * GRID_HEIGHT + 16);
