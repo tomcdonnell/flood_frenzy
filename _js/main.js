@@ -408,7 +408,10 @@ function rainUntilWaterLevelRisesByOne(rainX, rainY)
       gridCoords = {x: rainX, y: rainY};
    }
 
-   drawTextOnGridSquare(gridCoords.x, gridCoords.y, 'M'); // Mark local minima.
+   if (gameState.gridNumbersAreShown)
+   {
+      drawTextOnGridSquare(gridCoords.x, gridCoords.y, 'M'); // Mark local minima.
+   }
 }
 
 function findLocalLowestGridCoordsRecursively(x, y)
@@ -468,12 +471,15 @@ function findLocalLowestGridCoordsRecursively(x, y)
 
    let lowerGridSquare = allResultCoords[0];
 
-   // Draw line from current grid square to new grid square.
-   ctx.strokeStyle = 'rgb(255, 0, 0)'; // Set draw colour to red.
-   ctx.beginPath();                    // Start a path that will later be drawn.
-   ctx.moveTo(x                 * GRID_WIDTH + 16, y                 * GRID_HEIGHT + 16);
-   ctx.lineTo(lowerGridSquare.x * GRID_WIDTH + 16, lowerGridSquare.y * GRID_HEIGHT + 16);
-   ctx.stroke();
+   if (gameState.gridNumbersAreShown)
+   {
+      // Draw line from current grid square to new grid square.
+      ctx.strokeStyle = 'rgb(255, 0, 0)'; // Set draw colour to red.
+      ctx.beginPath();                    // Start a path that will later be drawn.
+      ctx.moveTo(x                 * GRID_WIDTH + 16, y                 * GRID_HEIGHT + 16);
+      ctx.lineTo(lowerGridSquare.x * GRID_WIDTH + 16, lowerGridSquare.y * GRID_HEIGHT + 16);
+      ctx.stroke();
+   }
 
    // Return the coordinates of the lowest neighbouring grid square.
    return findLocalLowestGridCoordsRecursively(lowerGridSquare.x, lowerGridSquare.y);
