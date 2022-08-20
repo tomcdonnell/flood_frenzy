@@ -117,11 +117,6 @@ function generateTerrainGrid()
       }
    }
 
-   // Choose one random square to be a water source.
-   let waterX = getRandomInt(0, GRID_WIDTH );
-   let waterY = getRandomInt(0, GRID_LENGTH);
-   terrainGrid[waterX][waterY] = 0;
-
    // Choose five random squares to be mountain tops.
    // If the mountain tops happen to be on the same squares, that is no problem.
    for (let i = 0; i < 5; ++i)
@@ -133,18 +128,42 @@ function generateTerrainGrid()
       terrainGrid[mountainTopX][mountainTopY] = mountainHeight;
    }
 
-   // First left->right, top->bottom.
+   for (var i = 0; i < 20; ++i)
+   {
+      let tempTerrainGrid = copyArray(terrainGrid);
+
+      // Fill in terrain surrounding mountain tops.  First left->right, top->bottom.
+      for (let x = 0; x < GRID_WIDTH; ++x)
+      {
+         for (let y = 0; y < GRID_LENGTH; ++y)
+         {
+            if (terrainGrid[x][y] === null && terrainSquareHasNonNullNeighbour(x, y))
+            {
+               // Fill in empty terrain square depending on height of surrounding squares.
+               let heightOfHighestNeighbour = getHeightOfHighestNeighbour(x, y);
+               let randomDecrement          = getRandomInt(1, 3);
+               let newHeight                = ((heightOfHighestNeighbour > randomDecrement)? heightOfHighestNeighbour - randomDecrement: 0);
+
+               tempTerrainGrid[x][y] = newHeight;
+            }
+            else
+            {
+               tempTerrainGrid[x][y] = terrainGrid[x][y];
+            }
+         }
+      }
+
+      terrainGrid = copyArray(tempTerrainGrid);
+   }
+
+   // Final pass to convert any null squares to zero.
    for (let x = 0; x < GRID_WIDTH; ++x)
    {
       for (let y = 0; y < GRID_LENGTH; ++y)
       {
          if (terrainGrid[x][y] === null)
          {
-            // Fill in empty terrain square depending on height of surrounding squares.
-            let heightOfHighestNeighbour = getHeightOfHighestNeighbour(x, y);
-            let newHeight                = ((heightOfHighestNeighbour > 0)? heightOfHighestNeighbour - 1: 0);
-
-            terrainGrid[x][y] = newHeight;
+            terrainGrid[x][y] = 0;
          }
       }
    }
@@ -218,4 +237,39 @@ function getHeightOfHighestNeighbour(x, y)
    if (y < GRID_LENGTH - 1 && x < GRID_WIDTH - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
 
    return highestH;
+}
+
+function terrainSquareHasNonNullNeighbour(x, y)
+{
+   let highestH = 0;
+
+   if (y > 0               && x > 0             ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
+   if (y > 0                                    ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
+   if (y > 0               && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
+
+   if (                       x > 0             ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
+   if (                       x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
+
+   if (y < GRID_LENGTH - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
+   if (y < GRID_LENGTH - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
+   if (y < GRID_LENGTH - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
+
+   return false;
+}
+
+function copyArray(terrainGrid)
+{
+   let newTerrainGrid = [];
+
+   for (let x = 0; x < GRID_WIDTH; ++x)
+   {
+      newTerrainGrid[x] = [];
+
+      for (let y = 0; y < GRID_LENGTH; ++y)
+      {
+         newTerrainGrid[x][y] = terrainGrid[x][y];
+      }
+   }
+
+   return newTerrainGrid;
 }
