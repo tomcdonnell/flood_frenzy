@@ -22,8 +22,9 @@ let gameGrid                  = [];
 let terrainGrid               = [];
 let gameState                 =
 {
-   gameMode           : 'game', // Possible values: {'simulation', 'game'}
+   gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
    gridNumbersAreShown: false,
+   hasHouse           : true,
    isBuildingWalls    : false,
    wallBudget         : INITIAL_WALL_BUDGET,
    waterLevel         : null
@@ -54,7 +55,8 @@ let imageFilenames =
    '_images/19 rock darkest half snow layer.png',
    '_images/20 pure snow layer.png',
    '_images/21 flood barrier.png',
-   '_images/22 house transparent.png'
+   '_images/22 house transparent.png',
+   '_images/23 house destroyed in water.png'
 ];
 
 Promise.all
@@ -81,7 +83,8 @@ Promise.all
       loadImage(imageFilenames[18]),
       loadImage(imageFilenames[19]),
       loadImage(imageFilenames[20]),
-      loadImage(imageFilenames[21])
+      loadImage(imageFilenames[21]),
+      loadImage(imageFilenames[22])
    ]
 )
 .then
@@ -152,6 +155,21 @@ function initialiseGameGrid()
          }
       }
    }
+
+   // Add houses.
+   let nHousesAdded = 0;
+   while (nHousesAdded < 20)
+   {
+      let houseX          = getRandomInt(0, GRID_WIDTH );
+      let houseY          = getRandomInt(0, GRID_HEIGHT);
+      let houseGridSquare = gameGrid[houseX][houseY];
+
+      if (5 < houseGridSquare.height && houseGridSquare.height < 15)
+      {
+         houseGridSquare.hasHouse = true;
+         ++nHousesAdded;
+      }
+   }
 }
 
 function drawGameGrid(boolDrawHeightNumbersOnSquares)
@@ -169,9 +187,11 @@ function drawGameGrid(boolDrawHeightNumbersOnSquares)
 
          let imageForGridSquare =
          (
-            (gridSquareObj.isWall)?
-            globalImages[20]:
-            globalImages[gridSquareObj.height]
+            (gridSquareObj.isWall)? globalImages[20]:
+            (
+               (gridSquareObj.hasHouse)? globalImages[21]:
+               globalImages[gridSquareObj.height]
+            )
          );
 
          drawSpriteOnGridSquare(x, y, imageForGridSquare);
@@ -269,7 +289,6 @@ function onClickGameModeButton()
    gameState.gameMode   = 'game';
    gameState.wallBudget = INITIAL_WALL_BUDGET;
    $('span.wall-budget').html(gameState.wallBudget);
-
 }
 
 function onClickSimulationModeButton()
@@ -301,6 +320,8 @@ function onClickInformationModeButton()
    $('div.information-div'          ).show();
    $('input#information-mode-button').closest('label').addClass('selected');
    $('p.simulation-instructions'    ).hide();
+
+   gameState.gameMode = 'game';
 }
 
 function onClickHighScoresModeButton()
@@ -314,6 +335,8 @@ function onClickHighScoresModeButton()
    $('div.information-div'          ).hide();
    $('input#high-scores-mode-button').closest('label').addClass('selected');
    $('p.simulation-instructions'    ).hide();
+
+   gameState.gameMode = 'high-scores';
 }
 
 function onClickGenerateNewTerrain()
@@ -535,7 +558,10 @@ function addWaterUpToWaterLevelRecursively(x, y)
       {
          gameGrid[coord.x][coord.y].height       = gameState.waterLevel;
          gameGrid[coord.x][coord.y].isUnderWater = true;
-         drawSpriteOnGridSquare(coord.x, coord.y, globalImages[0]);
+
+         let imageIndex = ((gameGrid[coord.x][coord.y].hasHouse)? 22: 0);
+
+         drawSpriteOnGridSquare(coord.x, coord.y, globalImages[imageIndex]);
 
          addWaterUpToWaterLevelRecursively(coord.x, coord.y);
       }
