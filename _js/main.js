@@ -9,12 +9,13 @@ ctx.canvas.height = 1022;
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
-const GRID_WIDTH          =  32; // Horizontal dimension on screen.
-const SPRITE_HEIGHT       =  32;
-const SPRITE_WIDTH        =  32;
-const MAX_TERRAIN_HEIGHT  =  20;
-const INITIAL_WALL_BUDGET = 150;
+const GRID_HEIGHT           =  32; // Vertical   dimension on screen.
+const GRID_WIDTH            =  32; // Horizontal dimension on screen.
+const INITIAL_WALL_BUDGET   = 150;
+const MAX_TERRAIN_HEIGHT    =  20;
+const N_RAINDROPS_PER_FLOOD =  18;
+const SPRITE_HEIGHT         =  32;
+const SPRITE_WIDTH          =  32;
 
 let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
 let globalImages              = [];
@@ -24,8 +25,12 @@ let gameState                 =
 {
    gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
    gridNumbersAreShown: false,
+   floodIsReceding    : false,
    hasHouse           : true,
    isBuildingWalls    : false,
+   roundNo            : 1,
+   totalHousesLost    : 0,
+   totalHousesSaved   : 0,
    wallBudget         : INITIAL_WALL_BUDGET
 };
 
@@ -99,10 +104,6 @@ function main(images)
 {
    globalImages = images;
 
-   initialiseGameGrid();
-
-   drawGameGrid(false); // Initially draw the grid without the numbers.
-
    // Add images to color-key.
    for (let i = 0; i < 20; ++i)
    {
@@ -135,6 +136,7 @@ function initialiseGameGrid()
          gameGrid[x][y] =
          {
             height      : gridSquareHeight,
+            heightOrig  : gridSquareHeight, // Used when the flood recedes.
             isUnderwater: (gridSquareHeight < 10),
             isWall      : false
          }
@@ -271,9 +273,15 @@ function onClickGameModeButton()
    $('input#game-mode-button'                  ).closest('label').addClass('selected');
    $('p.simulation-instructions'               ).hide();
 
-   gameState.gameMode   = 'game';
-   gameState.wallBudget = INITIAL_WALL_BUDGET;
+   gameState.floodIsReceding   = false;
+   gameState.gameMode          = 'game';
+   gameState.nRainDropsFallen  = 0;
+   gameState.roundNo           = 1;
+   gameState.wallBudget        = INITIAL_WALL_BUDGET;
    $('span.wall-budget').html(gameState.wallBudget);
+
+   initialiseGameGrid();
+   drawGameGrid(false); // Initially draw the grid without the numbers.
 }
 
 function onClickSimulationModeButton()
@@ -322,6 +330,62 @@ function onClickHighScoresModeButton()
    $('p.simulation-instructions'    ).hide();
 
    gameState.gameMode = 'high-scores';
+}
+
+function onClickStartRound()
+{
+   window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
+}
+
+function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
+{
+   if (gameState.floodIsReceding)
+   {
+      // Decrease water level everyone by one.
+      for (let x = 0; x < GRID_WIDTH; ++x)
+      {
+         for (let y = 0; y < GRID_HEIGHT; ++y)
+         {
+            if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
+            {
+               --gameGrid[x][y].height;
+
+               if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
+               {
+                  let imageIndex = ((gameGrid[x][y].hasHouse)? 22: gameGrid[x][y].height);
+
+                  drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
+               }
+            }
+         }
+      }
+
+      // Re-use gameState.nRainDropsFallen so we can know when the flood has completely receded.
+      --gameState.nRainDropsFallen;
+
+      if (gameState.nRainDropsFallen > 0)
+      {
+         window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
+      }
+      else
+      {
+         // Next round!
+      }
+   }
+   else
+   {
+      let rainX = getRandomInt(0, GRID_WIDTH );
+      let rainY = getRandomInt(0, GRID_HEIGHT);
+
+      rainUntilWaterLevelRisesByOne(rainX, rainY);
+
+      if (gameState.nRainDropsFallen >= N_RAINDROPS_PER_FLOOD)
+      {
+         gameState.floodIsReceding = true;
+      }
+
+      window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
+   }
 }
 
 function onClickGenerateNewTerrain()
@@ -427,6 +491,8 @@ function rainUntilWaterLevelRisesByOne(rainX, rainY)
 
    let targetWaterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
    addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y, targetWaterLevel);
+
+   ++gameState.nRainDropsFallen;
 }
 
 function findLocalLowestGridCoordsRecursively(x, y)

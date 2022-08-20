@@ -200,10 +200,10 @@ div.game-mode-round-start-popup > ul > li
     <li>Click and drag your mouse on the map to build walls</li>
     <li>Position your walls to protect houses before the floods arrive</li>
     <li>Watch your wall budget so you don't run out of materials</li>
-    <li>Be quick!  Flood waters will start rising in five seconds</li>
+    <li>Be quick!  Flood waters will start rising immediately</li>
    </ul>
    <div class='skip-buttons-div'>
-    <button onclick="$('div.game-mode-round-start-popup').hide()">Start</button>
+    <button onclick="$('div.game-mode-round-start-popup').hide();onClickStartRound()">Start</button>
    </div>
   </div>
   <script src='_js/main.js'></script>
