@@ -13,7 +13,7 @@ const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
 const GRID_WIDTH          =  32; // Horizontal dimension on screen.
 const INITIAL_WALL_BUDGET = 100;
 const MAX_TERRAIN_HEIGHT  =  20;
-const N_HOUSES_PER_MAP    =  25;
+const N_HOUSES_PER_MAP    =  35;
 const N_MOUNTAINS_PER_MAP =   5;
 const N_ROUNDS_PER_GAME   =   3;
 const SPRITE_HEIGHT       =  32;
@@ -156,7 +156,7 @@ function initialiseGameGrid()
       let houseY          = getRandomInt(0, GRID_HEIGHT);
       let houseGridSquare = gameGrid[houseX][houseY];
 
-      if (4 < houseGridSquare.height && houseGridSquare.height < 15)
+      if (3 < houseGridSquare.height && houseGridSquare.height < 15)
       {
          houseGridSquare.hasHouse = true;
          ++nHousesAdded;
@@ -285,7 +285,8 @@ function onClickGameModeButton()
    gameState.playerScore      = 0;
    gameState.roundNo          = 1;
    gameState.wallBudget       = INITIAL_WALL_BUDGET;
-   $('span.wall-budget').html(gameState.wallBudget);
+   $('span.wall-budget'  ).html(gameState.wallBudget);
+   $('span.round-no-span').html(gameState.roundNo   );
 
    initialiseGameGrid();
    drawGameGrid(false); // Initially draw the grid without the numbers.
@@ -755,17 +756,19 @@ function updateScoreAndShowEndOfRoundSummary()
       }
    }
 
-console.info('nHomesTotal: ', nHomesTotal);
-   let nHomesSaved = nHomesTotal - gameState.nHomesLost;
-   let divJq       = $('div.round-summary-popup');
+   let nHomesSaved    = nHomesTotal - gameState.nHomesLost;
+   let scoreIncrement = nHomesSaved - gameState.nHomesLost;
+   let divJq          = $('div.round-summary-popup');
 
-   gameState.playerScore += (nHomesSaved - gameState.nHomesLost);
+   divJq.find('span.round-no-span'             ).html(gameState.roundNo    );
+   divJq.find('span.n-homes-lost-span'         ).html(gameState.nHomesLost );
+   divJq.find('span.n-homes-saved-span'        ).html(nHomesSaved          );
+   divJq.find('span.score-before-this-round'   ).html(gameState.playerScore);
+   divJq.find('span.score-increment-this-round').html(scoreIncrement       );
 
-   divJq.find('span.round-no-span'             ).html(gameState.roundNo                 );
-   divJq.find('span.n-homes-lost-span'         ).html(gameState.nHomesLost              );
-   divJq.find('span.n-homes-saved-span'        ).html(nHomesSaved                       );
-   divJq.find('span.score-increment-this-round').html(nHomesSaved - gameState.nHomesLost);
-   divJq.find('span.total-score-span'          ).html(gameState.playerScore);
+   gameState.playerScore += scoreIncrement;
+
+   divJq.find('span.total-score-span').html(gameState.playerScore);
    divJq.show();
 
    ++gameState.roundNo;
