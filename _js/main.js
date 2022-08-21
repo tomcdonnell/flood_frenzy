@@ -270,6 +270,7 @@ function onClickGameModeButton()
    $('div.buttons-div.game'                    ).show();
    $('div.buttons-div.simulation'              ).hide();
    $('div.color-key-div'                       ).show();
+   $('div.game-end-popup'                      ).hide();
    $('div.game-mode-div > label'               ).removeClass('selected');
    $('div.game-mode-start-sequence-popup'      ).hide();
    $('div.game-mode-start-sequence-popup.first').show();
