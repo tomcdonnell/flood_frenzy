@@ -406,8 +406,21 @@ function onClickToggleHeightNumbers()
 
 function onClickRainOnRandomSquare()
 {
-   let rainX = getRandomInt(0, GRID_WIDTH );
-   let rainY = getRandomInt(0, GRID_HEIGHT);
+   let rainX         = null;
+   let rainY         = null;
+   let squareIsValid = false;
+
+   while (!squareIsValid)
+   {
+      rainX = getRandomInt(0, GRID_WIDTH );
+      rainY = getRandomInt(0, GRID_HEIGHT);
+
+      if (!gameGrid[rainX][rainY].isWall)
+      {
+         squareIsValid = true;
+      }
+   }
+
    drawTextOnGridSquare(rainX, rainY, 'R');
    rainUntilWaterLevelRisesByOne(rainX, rainY);
 }
@@ -503,8 +516,20 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
    }
    else
    {
-      let rainX = getRandomInt(0, GRID_WIDTH );
-      let rainY = getRandomInt(0, GRID_HEIGHT);
+      let rainX         = null;
+      let rainY         = null;
+      let squareIsValid = false;
+
+      while (!squareIsValid)
+      {
+         rainX = getRandomInt(0, GRID_WIDTH );
+         rainY = getRandomInt(0, GRID_HEIGHT);
+
+         if (!gameGrid[rainX][rainY].isWall)
+         {
+            squareIsValid = true;
+         }
+      }
 
       rainUntilWaterLevelRisesByOne(rainX, rainY);
 
