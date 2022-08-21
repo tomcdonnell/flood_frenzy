@@ -9,13 +9,15 @@ ctx.canvas.height = 1022;
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const GRID_HEIGHT           =  32; // Vertical   dimension on screen.
-const GRID_WIDTH            =  32; // Horizontal dimension on screen.
-const INITIAL_WALL_BUDGET   = 150;
-const MAX_TERRAIN_HEIGHT    =  20;
-const N_RAINDROPS_PER_FLOOD =  18;
-const SPRITE_HEIGHT         =  32;
-const SPRITE_WIDTH          =  32;
+const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
+const GRID_WIDTH          =  32; // Horizontal dimension on screen.
+const INITIAL_WALL_BUDGET = 150;
+const MAX_TERRAIN_HEIGHT  =  20;
+const N_HOUSES_PER_MAP    =  25;
+const N_MOUNTAINS_PER_MAP =   5;
+const N_ROUNDS_PER_GAME   =   3;
+const SPRITE_HEIGHT       =  32;
+const SPRITE_WIDTH        =  32;
 
 let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
 let globalImages              = [];
@@ -28,6 +30,8 @@ let gameState                 =
    floodIsReceding    : false,
    hasHouse           : true,
    isBuildingWalls    : false,
+   nHomesLost         : 0,
+   playerScore        : 0,
    roundNo            : 1,
    totalHousesLost    : 0,
    totalHousesSaved   : 0,
@@ -114,7 +118,8 @@ function main(images)
    $('canvas').click(onClickCanvas);
 
    $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
-   $('span.wall-budget').html(gameState.wallBudget);
+   $('span.wall-budget'           ).html(gameState.wallBudget);
+   $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);
 
    onClickGameModeButton();
 }
@@ -137,21 +142,21 @@ function initialiseGameGrid()
          {
             height      : gridSquareHeight,
             heightOrig  : gridSquareHeight, // Used when the flood recedes.
-            isUnderwater: (gridSquareHeight < 10),
-            isWall      : false
+            isWall      : false,
+            isUnderwater: (gridSquareHeight <= 1)
          }
       }
    }
 
    // Add houses.
    let nHousesAdded = 0;
-   while (nHousesAdded < 20)
+   while (nHousesAdded < N_HOUSES_PER_MAP)
    {
       let houseX          = getRandomInt(0, GRID_WIDTH );
       let houseY          = getRandomInt(0, GRID_HEIGHT);
       let houseGridSquare = gameGrid[houseX][houseY];
 
-      if (5 < houseGridSquare.height && houseGridSquare.height < 15)
+      if (4 < houseGridSquare.height && houseGridSquare.height < 15)
       {
          houseGridSquare.hasHouse = true;
          ++nHousesAdded;
@@ -205,7 +210,7 @@ function generateTerrainGrid()
 
    // Choose six random squares to be mountain tops.
    // If the mountain tops happen to be on the same squares, that is no problem.
-   for (let i = 0; i < 6; ++i)
+   for (let i = 0; i < N_MOUNTAINS_PER_MAP; ++i)
    {
       let mountainTopX   = getRandomInt(0, GRID_WIDTH );
       let mountainTopY   = getRandomInt(0, GRID_HEIGHT);
@@ -273,11 +278,13 @@ function onClickGameModeButton()
    $('input#game-mode-button'                  ).closest('label').addClass('selected');
    $('p.simulation-instructions'               ).hide();
 
-   gameState.floodIsReceding   = false;
-   gameState.gameMode          = 'game';
-   gameState.nRainDropsFallen  = 0;
-   gameState.roundNo           = 1;
-   gameState.wallBudget        = INITIAL_WALL_BUDGET;
+   gameState.floodIsReceding  = false;
+   gameState.gameMode         = 'game';
+   gameState.nHomesLost       = 0;
+   gameState.nRainDropsFallen = 0;
+   gameState.playerScore      = 0;
+   gameState.roundNo          = 1;
+   gameState.wallBudget       = INITIAL_WALL_BUDGET;
    $('span.wall-budget').html(gameState.wallBudget);
 
    initialiseGameGrid();
@@ -290,10 +297,13 @@ function onClickSimulationModeButton()
    $('div.buttons-div.game'              ).hide();
    $('div.buttons-div.simulation'        ).show();
    $('div.color-key-div'                 ).show();
+   $('div.game-end-popup'                ).hide();
    $('div.game-mode-div > label'         ).removeClass('selected');
    $('div.game-mode-start-sequence-popup').hide();
    $('div.high-scores-div'               ).hide();
    $('div.information-div'               ).hide();
+   $('div.round-start-popup'             ).hide();
+   $('div.round-summary-popup'           ).hide();
    $('input#simulation-mode-button'      ).closest('label').addClass('selected');
    $('p.simulation-instructions'         ).show();
 
@@ -308,9 +318,12 @@ function onClickInformationModeButton()
    $('div.buttons-div.game'         ).hide();
    $('div.buttons-div.simulation'   ).hide();
    $('div.color-key-div'            ).hide();
+   $('div.game-end-popup'           ).hide();
    $('div.game-mode-div > label'    ).removeClass('selected');
    $('div.high-scores-div'          ).hide();
    $('div.information-div'          ).show();
+   $('div.round-start-popup'        ).hide();
+   $('div.round-summary-popup'      ).hide();
    $('input#information-mode-button').closest('label').addClass('selected');
    $('p.simulation-instructions'    ).hide();
 
@@ -323,69 +336,50 @@ function onClickHighScoresModeButton()
    $('div.buttons-div.game'         ).hide();
    $('div.buttons-div.simulation'   ).hide();
    $('div.color-key-div'            ).hide();
+   $('div.game-end-popup'           ).hide();
    $('div.game-mode-div > label'    ).removeClass('selected');
    $('div.high-scores-div'          ).show();
    $('div.information-div'          ).hide();
+   $('div.round-start-popup'        ).hide();
+   $('div.round-summary-popup'      ).hide();
    $('input#high-scores-mode-button').closest('label').addClass('selected');
    $('p.simulation-instructions'    ).hide();
 
    gameState.gameMode = 'high-scores';
 }
 
-function onClickStartRound()
+function onClickContinueToNextRound()
 {
-   window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
-}
-
-function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
-{
-   if (gameState.floodIsReceding)
+   if (gameState.roundNo <= N_ROUNDS_PER_GAME)
    {
-      // Decrease water level everyone by one.
-      for (let x = 0; x < GRID_WIDTH; ++x)
-      {
-         for (let y = 0; y < GRID_HEIGHT; ++y)
-         {
-            if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
-            {
-               --gameGrid[x][y].height;
-
-               if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
-               {
-                  let imageIndex = ((gameGrid[x][y].hasHouse)? 22: gameGrid[x][y].height);
-
-                  drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
-               }
-            }
-         }
-      }
-
-      // Re-use gameState.nRainDropsFallen so we can know when the flood has completely receded.
-      --gameState.nRainDropsFallen;
-
-      if (gameState.nRainDropsFallen > 0)
-      {
-         window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
-      }
-      else
-      {
-         // Next round!
-      }
+      let divJq = $('div.round-start-popup');
+      divJq.find('span.round-no-span').html(gameState.roundNo);
+      divJq.show();
    }
    else
    {
-      let rainX = getRandomInt(0, GRID_WIDTH );
-      let rainY = getRandomInt(0, GRID_HEIGHT);
-
-      rainUntilWaterLevelRisesByOne(rainX, rainY);
-
-      if (gameState.nRainDropsFallen >= N_RAINDROPS_PER_FLOOD)
-      {
-         gameState.floodIsReceding = true;
-      }
-
-      window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 500);
+      let divJq = $('div.game-end-popup');
+      divJq.find('span.total-score-span').html(gameState.playerScore);
+      divJq.show();
    }
+}
+
+function onClickStartRound()
+{
+   gameState.floodIsReceding   = false;
+   gameState.gameMode          = 'game';
+   gameState.nHomesLost        = 0;
+   gameState.nRainDropsFallen  = 0;
+   gameState.wallBudget        = INITIAL_WALL_BUDGET;
+   $('span.wall-budget').html(gameState.wallBudget);
+
+   if (gameState.roundNo != 1)
+   {
+      initialiseGameGrid();
+      drawGameGrid(false); // Initially draw the grid without the numbers.
+   }
+
+   window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 1000);
 }
 
 function onClickGenerateNewTerrain()
@@ -438,8 +432,8 @@ function onMouseMoveCanvas(e)
       if (gameGrid[mouseGridX][mouseGridY].height < MAX_TERRAIN_HEIGHT - 1)
       {
          drawSpriteOnGridSquare(mouseGridX, mouseGridY, globalImages[20]);
-         gameGrid[mouseGridX][mouseGridY].isWall  = true;
-         gameGrid[mouseGridX][mouseGridY].height += 1;
+         gameGrid[mouseGridX][mouseGridY].isWall = true;
+         gameGrid[mouseGridX][mouseGridY].height = 19;
 
          --gameState.wallBudget;
 
@@ -472,6 +466,66 @@ function onClickCanvas(e)
 }
 
 // Flood functions. //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
+{
+   if (gameState.floodIsReceding)
+   {
+      // Decrease water level everyone by one.
+      for (let x = 0; x < GRID_WIDTH; ++x)
+      {
+         for (let y = 0; y < GRID_HEIGHT; ++y)
+         {
+            if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
+            {
+               --gameGrid[x][y].height;
+
+               if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
+               {
+                  gameGrid[x][y].isUnderwater = (gameGrid[x][y].heightOrig <= 1);
+
+                  let imageIndex =
+                  (
+                     (gameGrid[x][y].hasHouse)? 22:
+                     (
+                        (gameGrid[x][y].isWall)? 20:
+                        gameGrid[x][y].height
+                     )
+                  );
+
+                  drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
+               }
+            }
+         }
+      }
+
+      // Count down gameState.nRainDropsFallen so we know when the flood has completely receded.
+      --gameState.nRainDropsFallen;
+
+      if (gameState.nRainDropsFallen > 0)
+      {
+         window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 100);
+      }
+      else
+      {
+         updateScoreAndShowEndOfRoundSummary();
+      }
+   }
+   else
+   {
+      let rainX = getRandomInt(0, GRID_WIDTH );
+      let rainY = getRandomInt(0, GRID_HEIGHT);
+
+      rainUntilWaterLevelRisesByOne(rainX, rainY);
+
+      if (getPercentageOfGridUnderwater() > 50)
+      {
+         gameState.floodIsReceding = true;
+      }
+
+      window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 1000);
+   }
+}
 
 function rainUntilWaterLevelRisesByOne(rainX, rainY)
 {
@@ -577,8 +631,7 @@ function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
       gameGrid[x][y].height < targetWaterLevel
    )
    {
-      gameGrid[x][y].height       = targetWaterLevel;
-      gameGrid[x][y].isUnderWater = true;
+      gameGrid[x][y].height = targetWaterLevel;
       drawSpriteOnGridSquare(x, y, globalImages[0]);
    }
 
@@ -608,9 +661,15 @@ function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
       )
       {
          gameGrid[coord.x][coord.y].height       = targetWaterLevel;
-         gameGrid[coord.x][coord.y].isUnderWater = true;
+         gameGrid[coord.x][coord.y].isUnderwater = true;
 
-         let imageIndex = ((gameGrid[coord.x][coord.y].hasHouse)? 22: 0);
+         let imageIndex = 0;
+
+         if (gameGrid[coord.x][coord.y].hasHouse)
+         {
+            ++gameState.nHomesLost;
+            imageIndex = 22;
+         }
 
          drawSpriteOnGridSquare(coord.x, coord.y, globalImages[imageIndex]);
 
@@ -674,6 +733,55 @@ function terrainSquareHasNonNullNeighbour(x, y)
    if (y < GRID_HEIGHT - 1 && x < GRID_WIDTH - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
 
    return false;
+}
+
+function updateScoreAndShowEndOfRoundSummary()
+{
+   let nHomesTotal = 0;
+
+   for (let x = 0; x < GRID_WIDTH; ++x)
+   {
+      for (let y = 0; y < GRID_HEIGHT; ++y)
+      {
+         if (gameGrid[x][y].hasHouse)
+         {
+            ++nHomesTotal;
+         }
+      }
+   }
+
+console.info('nHomesTotal: ', nHomesTotal);
+   let nHomesSaved = nHomesTotal - gameState.nHomesLost;
+   let divJq       = $('div.round-summary-popup');
+
+   gameState.playerScore += (nHomesSaved - gameState.nHomesLost);
+
+   divJq.find('span.round-no-span'             ).html(gameState.roundNo                 );
+   divJq.find('span.n-homes-lost-span'         ).html(gameState.nHomesLost              );
+   divJq.find('span.n-homes-saved-span'        ).html(nHomesSaved                       );
+   divJq.find('span.score-increment-this-round').html(nHomesSaved - gameState.nHomesLost);
+   divJq.find('span.total-score-span'          ).html(gameState.playerScore);
+   divJq.show();
+
+   ++gameState.roundNo;
+}
+
+function getPercentageOfGridUnderwater()
+{
+   let nSquaresUnderwater = 0;
+
+   for (let x = 0; x < GRID_WIDTH; ++x)
+   {
+      for (let y = 0; y < GRID_HEIGHT; ++y)
+      {
+         if (gameGrid[x][y].isUnderwater)
+         {
+            ++nSquaresUnderwater;
+         }
+      }
+   }
+
+   return (nSquaresUnderwater / (GRID_WIDTH * GRID_HEIGHT)) * 100;
 }
 
 function loadImage(url)

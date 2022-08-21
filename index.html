@@ -65,7 +65,9 @@ div.game-mode-div > label.selected
 }
 
 div.game-mode-start-sequence-popup,
-div.game-mode-round-start-popup
+div.round-start-popup,
+div.round-summary-popup,
+div.game-end-popup
 {
    background-color: white;
    border: 10px solid black;
@@ -78,7 +80,9 @@ div.game-mode-round-start-popup
 }
 
 div.game-mode-start-sequence-popup > p,
-div.game-mode-round-start-popup > p
+div.round-start-popup > p,
+div.round-summary-popup > p,
+div.game-end-popup > p
 {
    bottom: 160px;
    left: 270px;
@@ -87,25 +91,33 @@ div.game-mode-round-start-popup > p
    text-align: left;
 }
 
-div.game-mode-round-start-popup
+div.round-start-popup,
+div.round-summary-popup,
+div.game-end-popup
 {
    text-align: center;
    font-size: 25px;
 }
 
-div.game-mode-round-start-popup button
+div.round-start-popup button,
+div.round-summary-popup button,
+div.game-end-popup button
 {
    font-size: 25px;
    margin-bottom: 20px;
 }
 
-div.game-mode-round-start-popup > ul
+div.round-start-popup > ul,
+div.round-summary-popup > ul,
+div.game-end-popup > ul
 {
    font-size: 22px;
    text-align: left;
 }
 
-div.game-mode-round-start-popup > ul > li
+div.round-start-popup > ul > li,
+div.round-summary-popup > ul > li,
+div.game-end-popup > ul > li
 {
    margin-bottom: 5px;
 }
@@ -161,7 +173,7 @@ div.game-mode-round-start-popup > ul > li
    <p>There's a hundred year flood coming.<br/>We need help to protect our homes.</p>
    <div class='skip-buttons-div'>
     <button onclick="$('div.game-mode-start-sequence-popup.first').hide();$('div.game-mode-start-sequence-popup.second').show();">Skip</button>
-    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.round-start-popup').show();">Skip all</button>
    </div>
   </div>
   <div class='game-mode-start-sequence-popup second' style='display:none'>
@@ -170,7 +182,7 @@ div.game-mode-round-start-popup > ul > li
    <p>Hundred year flood you say?<br/>We've seen a few of those lately.</p>
    <div class='skip-buttons-div'>
     <button onclick="$('div.game-mode-start-sequence-popup.second').hide();$('div.game-mode-start-sequence-popup.third').show();">Skip</button>
-    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.round-start-popup').show();">Skip all</button>
    </div>
   </div>
   <div class='game-mode-start-sequence-popup third' style='display:none'>
@@ -178,11 +190,11 @@ div.game-mode-round-start-popup > ul > li
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>
     This time will be worse than before.<br/>
-    You'll have ten regions to protect.<br/>The floods will come thick and fast.
+    You'll have <span class='n-rounds-per-game-span'>5</span> regions to protect.<br/>The floods will come thick and fast.
    </p>
    <div class='skip-buttons-div'>
     <button onclick="$('div.game-mode-start-sequence-popup.third').hide();$('div.game-mode-start-sequence-popup.fourth').show();">Skip</button>
-    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.round-start-popup').show();">Skip all</button>
    </div>
   </div>
   <div class='game-mode-start-sequence-popup fourth' style='display:none'>
@@ -190,12 +202,12 @@ div.game-mode-round-start-popup > ul > li
    <img src='_images/28 speech bubble.png' height='168' width='600'/>
    <p>I know the drill Mr Mayor.<br/>You can count on me.</p>
    <div class='skip-buttons-div'>
-    <button onclick="$('div.game-mode-start-sequence-popup.fourth').hide();$('div.game-mode-round-start-popup').show();">Skip</button>
-    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.game-mode-round-start-popup').show();">Skip all</button>
+    <button onclick="$('div.game-mode-start-sequence-popup.fourth').hide();$('div.round-start-popup').show();">Skip</button>
+    <button onclick="$('div.game-mode-start-sequence-popup').hide();$('div.round-start-popup').show();">Skip all</button>
    </div>
   </div>
-  <div class='game-mode-round-start-popup' style='display:none'>
-   <h2>Round 1 of 10</h2>
+  <div class='round-start-popup' style='display:none'>
+   <h2>Round <span class='round-no-span'>1</span> of <span class='n-rounds-per-game-span'>5</span></h2>
    <ul>
     <li>Click and drag your mouse on the map to build walls</li>
     <li>Position your walls to protect houses before the floods arrive</li>
@@ -203,7 +215,30 @@ div.game-mode-round-start-popup > ul > li
     <li>Be quick!  Flood waters will start rising immediately</li>
    </ul>
    <div class='skip-buttons-div'>
-    <button onclick="$('div.game-mode-round-start-popup').hide();onClickStartRound()">Start</button>
+    <button onclick="$('div.round-start-popup').hide();onClickStartRound()">Start</button>
+   </div>
+  </div>
+  <div class='round-summary-popup' style='display:none'>
+   <h2>End of Round <span class='round-no-span'>1</span> of <span class='n-rounds-per-game-span'>5</span></h2>
+   <ul>
+    <li><span class='n-homes-lost-span'>0</span> homes lost</li>
+    <li><span class='n-homes-saved-span'>0</span> homes saved</li>
+    <li>Score increment this round: <span class='score-increment-this-round'>0</span></li>
+    <li>Total score: <span class='total-score-span'>0</span></li>
+   </ul>
+   <div class='skip-buttons-div'>
+    <button onclick="$('div.round-start-popup').hide();$('div.round-summary-popup').hide();onClickContinueToNextRound()">Continue</button>
+   </div>
+  </div>
+  <div class='game-end-popup' style='display:none'>
+   <h2>End of Game</h2>
+   <ul>
+    <li>Rounds completed: <span class='n-rounds-per-game-span'>5</span></li>
+    <li>Total score: <span class='total-score-span'>0</span></li>
+   </ul>
+   <div class='skip-buttons-div'>
+    <button onclick='onClickGameModeButton()'>Play again</button>
+    <button onclick='onClickSimulationModeButton()'>Try simulation mode</button>
    </div>
   </div>
   <script src='_js/main.js'></script>
