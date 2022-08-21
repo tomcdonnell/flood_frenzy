@@ -275,7 +275,7 @@ function onClickGameModeButton()
    $('div.game-mode-start-sequence-popup.first').show();
    $('div.high-scores-div'                     ).hide();
    $('div.information-div'                     ).hide();
-   $('input#game-mode-button'                  ).closest('label').addClass('selected');
+   $('input#game-mode-button'                  ).prop('checked', true).closest('label').addClass('selected');
    $('p.simulation-instructions'               ).hide();
 
    gameState.floodIsReceding  = false;
@@ -402,6 +402,19 @@ function onClickToggleHeightNumbers()
    gameState.gridNumbersAreShown = !gameState.gridNumbersAreShown;
 }
 
+function onClickRainOnRandomSquare()
+{
+   let rainX = getRandomInt(0, GRID_WIDTH );
+   let rainY = getRandomInt(0, GRID_HEIGHT);
+   drawTextOnGridSquare(rainX, rainY, 'R');
+   rainUntilWaterLevelRisesByOne(rainX, rainY);
+}
+
+function onClickRecedeFlood()
+{
+   decreaseWaterLevelEverywhereByOne();
+}
+
 function onMouseUpCanvas(e)
 {
    gameState.isBuildingWalls = false
@@ -472,33 +485,7 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
 {
    if (gameState.floodIsReceding)
    {
-      // Decrease water level everyone by one.
-      for (let x = 0; x < GRID_WIDTH; ++x)
-      {
-         for (let y = 0; y < GRID_HEIGHT; ++y)
-         {
-            if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
-            {
-               --gameGrid[x][y].height;
-
-               if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
-               {
-                  gameGrid[x][y].isUnderwater = (gameGrid[x][y].heightOrig <= 1);
-
-                  let imageIndex =
-                  (
-                     (gameGrid[x][y].hasHouse)? 22:
-                     (
-                        (gameGrid[x][y].isWall)? 20:
-                        gameGrid[x][y].height
-                     )
-                  );
-
-                  drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
-               }
-            }
-         }
-      }
+      decreaseWaterLevelEverywhereByOne();
 
       // Count down gameState.nRainDropsFallen so we know when the flood has completely receded.
       --gameState.nRainDropsFallen;
@@ -525,6 +512,37 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
       }
 
       window.setTimeout(rainOnRandomSquarePeriodicallyUntilLimitThenRecede, 1000);
+   }
+}
+
+function decreaseWaterLevelEverywhereByOne()
+{
+   // Decrease water level everyone by one.
+   for (let x = 0; x < GRID_WIDTH; ++x)
+   {
+      for (let y = 0; y < GRID_HEIGHT; ++y)
+      {
+         if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
+         {
+            --gameGrid[x][y].height;
+
+            if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
+            {
+               gameGrid[x][y].isUnderwater = (gameGrid[x][y].heightOrig <= 1);
+
+               let imageIndex =
+               (
+                  (gameGrid[x][y].hasHouse)? 22:
+                  (
+                     (gameGrid[x][y].isWall)? 20:
+                     gameGrid[x][y].height
+                  )
+               );
+
+               drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
+            }
+         }
+      }
    }
 }
 

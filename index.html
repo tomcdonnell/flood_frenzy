@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta charset='UTF-8'>
-  <title>GovHack 2022</title>
+  <title>Flood Frenzy - GovHack 2022</title>
   <script type='text/javascript' src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
   <style>
 *
@@ -128,7 +128,7 @@ div.game-end-popup > ul > li
   <div class='game-mode-div'>
    <label for='game-mode-button' class='selected' onclick='onClickGameModeButton()'>
     Game<br/>
-    <input id='game-mode-button' type='radio' name='gameMode' value='simulation'/>
+    <input id='game-mode-button' type='radio' name='gameMode' value='simulation' checked='checked'/>
    </label>
    <label for='simulation-mode-button' onclick='onClickSimulationModeButton()'>
     Simulation<br/>
@@ -147,13 +147,15 @@ div.game-end-popup > ul > li
    Play with the buttons below, or click on any grid square to simulate rain falling on that square.
   </p>
   <div class='buttons-div game'>
-   <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
-   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
+   <button onclick='onClickToggleHeightNumbers()'>Toggle numbers</button>
+   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls
   </div>
   <div class='buttons-div simulation' style='display:none'>
    <button onclick='onClickGenerateNewTerrain()'>Generate new terrain</button>
-   <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
-   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls.
+   <button onclick='onClickToggleHeightNumbers()'>Toggle numbers</button>
+   <button onclick='onClickRainOnRandomSquare()'>Rain on random square</button>
+   <button onclick='onClickRecedeFlood()'>Recede flood</button>
+   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls
   </div>
   <div class='color-key-div'>
    <div>Terrain height color key:</div>
