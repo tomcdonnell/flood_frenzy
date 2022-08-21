@@ -11,7 +11,7 @@ ctx.canvas.height = 1022;
 
 const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
 const GRID_WIDTH          =  32; // Horizontal dimension on screen.
-const INITIAL_WALL_BUDGET = 150;
+const INITIAL_WALL_BUDGET = 100;
 const MAX_TERRAIN_HEIGHT  =  20;
 const N_HOUSES_PER_MAP    =  25;
 const N_MOUNTAINS_PER_MAP =   5;
@@ -660,16 +660,21 @@ function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
          gameGrid[coord.x][coord.y].height < targetWaterLevel
       )
       {
-         gameGrid[coord.x][coord.y].height       = targetWaterLevel;
-         gameGrid[coord.x][coord.y].isUnderwater = true;
+         gameGrid[coord.x][coord.y].height = targetWaterLevel;
 
          let imageIndex = 0;
 
          if (gameGrid[coord.x][coord.y].hasHouse)
          {
-            ++gameState.nHomesLost;
+            if (!gameGrid[coord.x][coord.y].isUnderwater)
+            {
+               ++gameState.nHomesLost;
+            }
+
             imageIndex = 22;
          }
+
+         gameGrid[coord.x][coord.y].isUnderwater = true;
 
          drawSpriteOnGridSquare(coord.x, coord.y, globalImages[imageIndex]);
 
