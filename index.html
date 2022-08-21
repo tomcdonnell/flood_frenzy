@@ -12,7 +12,12 @@
 
 body
 {
-   width: 1050px;
+   width: 1023px;
+}
+
+h1
+{
+   text-align: center;
 }
 
 div.buttons-div
@@ -33,7 +38,7 @@ span.wall-budget-container
 
 div.color-key-div span.height-number-span
 {
-   color: rgb(0, 0, 255);
+   color: rgb(255, 255, 255);
    font-weight: bold;
    position: relative;
    left: 26px;
@@ -121,6 +126,18 @@ div.game-end-popup > ul > li
 {
    margin-bottom: 5px;
 }
+
+table.high-scores-table
+{
+   border-collapse: collapse;
+   width: 100%;
+}
+
+table.high-scores-table th,
+table.high-scores-table td
+{
+   border: 1px solid black;
+}
   </style>
  </head>
  <body>
@@ -147,7 +164,7 @@ div.game-end-popup > ul > li
    Play with the buttons below, or click on any grid square to simulate rain falling on that square.
   </p>
   <div class='buttons-div game'>
-   <button onclick='onClickToggleHeightNumbers()'>Toggle numbers</button>
+   <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
    <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls
   </div>
   <div class='buttons-div simulation' style='display:none'>
@@ -165,9 +182,64 @@ div.game-end-popup > ul > li
   </canvas>
   <div class='information-div' style='display:none'>
    <h2>Information</h2>
+   <p>This project was created by Tom McDonnell and Arran McAuld for the GovHack 2022 competition.</p>
+   <p>It was inspired by data sets such as those listed below.</p>
+   <ul>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_Hobart_20_percent/FeatureServer' target='_blank'>
+      City of Hobart Flood Data with 20%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_Hobart_10_percent/FeatureServer' target='_blank'>
+      City of Hobart Flood Data with 10%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_Hobart_5_percent/FeatureServer' target='_blank'>
+      City of Hobart Flood Data with 5%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_New_Town_20_percent/FeatureServer' target='_blank'>
+      City of Hobart New Town Flood Data with 20%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_New_Town_10_percent/FeatureServer' target='_blank'>
+      City of Hobart New Town Flood Data with 10%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_New_Town_5_percent/FeatureServer' target='_blank'>
+      City of Hobart New Town Flood Data with 5%
+     </a>
+    </li>
+    <li>
+     <a href='https://services1.arcgis.com/NHqdsnvwfSTg42I8/arcgis/rest/services/CoH_Flood_Data_New_Town_1_percent/FeatureServer' target='_blank'>
+      City of Hobart New Town Flood Data with 1%
+     </a>
+    </li>
+   </ul>
+   <p>Our goal was to create a fun game that would allow users to explore the interesting mechanics of flooding in mountainous terrain.</p>
+   <p>
+    A tool such as this project's flood simulation mode could be used with real terrain data (from sources such as those listed above) to simulate
+    possible future flood situations.  Simulations can be used to investigate the effectiveness of different flood mitigation strategies.
+   </p>
   </div>
   <div class='high-scores-div' style='display:none'>
    <h2>High Scores</h2>
+   <table class='high-scores-table'>
+    <thead>
+     <tr>
+      <th>Player</th>
+      <th>Score</th>
+      <th>Date</th>
+     </tr>
+    </thead>
+    <tbody>
+    </tbody>
+   </table>
   </div>
   <div class='game-mode-start-sequence-popup first' style='display:none'>
    <img src='_images/27 mayor face.png' height='168'/>

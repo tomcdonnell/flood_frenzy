@@ -15,7 +15,7 @@ const INITIAL_WALL_BUDGET = 100;
 const MAX_TERRAIN_HEIGHT  =  20;
 const N_HOUSES_PER_MAP    =  35;
 const N_MOUNTAINS_PER_MAP =   5;
-const N_ROUNDS_PER_GAME   =   3;
+const N_ROUNDS_PER_GAME   =   5;
 const SPRITE_HEIGHT       =  32;
 const SPRITE_WIDTH        =  32;
 
@@ -315,36 +315,38 @@ function onClickSimulationModeButton()
 
 function onClickInformationModeButton()
 {
-   $('#canvas'                      ).hide();
-   $('div.buttons-div.game'         ).hide();
-   $('div.buttons-div.simulation'   ).hide();
-   $('div.color-key-div'            ).hide();
-   $('div.game-end-popup'           ).hide();
-   $('div.game-mode-div > label'    ).removeClass('selected');
-   $('div.high-scores-div'          ).hide();
-   $('div.information-div'          ).show();
-   $('div.round-start-popup'        ).hide();
-   $('div.round-summary-popup'      ).hide();
-   $('input#information-mode-button').closest('label').addClass('selected');
-   $('p.simulation-instructions'    ).hide();
+   $('#canvas'                           ).hide();
+   $('div.buttons-div.game'              ).hide();
+   $('div.buttons-div.simulation'        ).hide();
+   $('div.color-key-div'                 ).hide();
+   $('div.game-end-popup'                ).hide();
+   $('div.game-mode-div > label'         ).removeClass('selected');
+   $('div.game-mode-start-sequence-popup').hide();
+   $('div.high-scores-div'               ).hide();
+   $('div.information-div'               ).show();
+   $('div.round-start-popup'             ).hide();
+   $('div.round-summary-popup'           ).hide();
+   $('input#information-mode-button'     ).closest('label').addClass('selected');
+   $('p.simulation-instructions'         ).hide();
 
    gameState.gameMode = 'game';
 }
 
 function onClickHighScoresModeButton()
 {
-   $('#canvas'                      ).hide();
-   $('div.buttons-div.game'         ).hide();
-   $('div.buttons-div.simulation'   ).hide();
-   $('div.color-key-div'            ).hide();
-   $('div.game-end-popup'           ).hide();
-   $('div.game-mode-div > label'    ).removeClass('selected');
-   $('div.high-scores-div'          ).show();
-   $('div.information-div'          ).hide();
-   $('div.round-start-popup'        ).hide();
-   $('div.round-summary-popup'      ).hide();
-   $('input#high-scores-mode-button').closest('label').addClass('selected');
-   $('p.simulation-instructions'    ).hide();
+   $('#canvas'                           ).hide();
+   $('div.buttons-div.game'              ).hide();
+   $('div.buttons-div.simulation'        ).hide();
+   $('div.color-key-div'                 ).hide();
+   $('div.game-end-popup'                ).hide();
+   $('div.game-mode-div > label'         ).removeClass('selected');
+   $('div.game-mode-start-sequence-popup').hide();
+   $('div.high-scores-div'               ).show();
+   $('div.information-div'               ).hide();
+   $('div.round-start-popup'             ).hide();
+   $('div.round-summary-popup'           ).hide();
+   $('input#high-scores-mode-button'     ).closest('label').addClass('selected');
+   $('p.simulation-instructions'         ).hide();
 
    gameState.gameMode = 'high-scores';
 }
