@@ -42,44 +42,44 @@ let gameState                 =
 
 let imageFilenames =
 [
-   '_images/01 deep water layer.png',
-   '_images/02 shallow water layer.png',
-   '_images/03 light sand layer.png',
-   '_images/04 darker sand layer.png',
-   '_images/05 darkest sand layer.png',
-   '_images/06 grass lightest layer.png',
-   '_images/07 grass dark layer.png',
-   '_images/08 grass darker layer.png',
-   '_images/09 grass darkest layer.png',
-   '_images/10 dirt light layer.png',
-   '_images/11 dirt dark layer.png',
-   '_images/12 dirt darkest layer.png',
-   '_images/13 rock light layer.png',
-   '_images/14 rock dark layer.png',
-   '_images/15 rock darker layer.png',
-   '_images/16 rock darkest layer.png',
-   '_images/17 rock darkest realy small snow layer.png',
-   '_images/18 rock darkest small snow layer.png',
-   '_images/19 rock darkest half snow layer.png',
-   '_images/20 pure snow layer.png',
-   '_images/21 flood barrier.png',
-   '_images/22 house transparent.png',
-   '_images/23 house destroyed in water.png'
+   '_images/00_ground.png', // Water (deep   )
+   '_images/01_ground.png', // Water (shallow)
+   '_images/02_ground.png', // Sand (light )
+   '_images/03_ground.png', // Sand (medium)
+   '_images/04_ground.png', // Sand (dark  )
+   '_images/05_ground.png', // Green (lightest)
+   '_images/06_ground.png', // Green (light   )
+   '_images/07_ground.png', // Green (dark    )
+   '_images/08_ground.png', // Green (darkest )
+   '_images/09_ground.png', // \
+   '_images/10_ground.png', // |
+   '_images/11_ground.png', // |
+   '_images/12_ground.png', // |
+   '_images/13_ground.png', // |
+   '_images/14_ground.png', // +- TODO: Define these colors and ensure the user can tell for any two shades which one is higher.
+   '_images/15_ground.png', // |
+   '_images/16_ground.png', // |
+   '_images/17_ground.png', // |
+   '_images/18_ground.png', // |
+   '_images/19_ground.png', // /
+   '_images/flood_barrier.png',
+   '_images/house_transparent.png',
+   '_images/house_destroyed_in_water.png'
 ];
 
 Promise.all
 (
    [
-      loadImage(imageFilenames[0]),
-      loadImage(imageFilenames[1]),
-      loadImage(imageFilenames[2]),
-      loadImage(imageFilenames[3]),
-      loadImage(imageFilenames[4]),
-      loadImage(imageFilenames[5]),
-      loadImage(imageFilenames[6]),
-      loadImage(imageFilenames[7]),
-      loadImage(imageFilenames[8]),
-      loadImage(imageFilenames[9]),
+      loadImage(imageFilenames[ 0]),
+      loadImage(imageFilenames[ 1]),
+      loadImage(imageFilenames[ 2]),
+      loadImage(imageFilenames[ 3]),
+      loadImage(imageFilenames[ 4]),
+      loadImage(imageFilenames[ 5]),
+      loadImage(imageFilenames[ 6]),
+      loadImage(imageFilenames[ 7]),
+      loadImage(imageFilenames[ 8]),
+      loadImage(imageFilenames[ 9]),
       loadImage(imageFilenames[10]),
       loadImage(imageFilenames[11]),
       loadImage(imageFilenames[12]),
