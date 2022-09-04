@@ -2,22 +2,22 @@
  * vim: ts=3 sw=3 et wrap co=150 go-=b
  */
 
-const ctx = document.getElementById('canvas').getContext('2d');
-
-ctx.canvas.width  = 1022;
-ctx.canvas.height = 1022;
-
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const GRID_HEIGHT         =  32; // Vertical   dimension on screen.
-const GRID_WIDTH          =  32; // Horizontal dimension on screen.
+const GRID_HEIGHT         =  32; // Vertical   dimension on screen (default 32).
+const GRID_WIDTH          =  32; // Horizontal dimension on screen (default 32).
 const INITIAL_WALL_BUDGET = 100;
 const MAX_TERRAIN_HEIGHT  =  20;
-const N_HOUSES_PER_MAP    =  35;
-const N_MOUNTAINS_PER_MAP =   5;
+const N_HOUSES_PER_MAP    =   0; // Default 35.
+const N_MOUNTAINS_PER_MAP =   6; // Default 6.
 const N_ROUNDS_PER_GAME   =   5;
-const SPRITE_HEIGHT       =  32;
-const SPRITE_WIDTH        =  32;
+const SPRITE_HEIGHT       =  32; // Must match height of cell images (default 32).
+const SPRITE_WIDTH        =  32; // Must match width  of cell images (default 32).
+
+let ctx = document.getElementById('canvas').getContext('2d');
+
+ctx.canvas.width  = GRID_WIDTH  * SPRITE_WIDTH ;
+ctx.canvas.height = GRID_HEIGHT * SPRITE_HEIGHT;
 
 let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
 let globalImages              = [];
@@ -116,7 +116,6 @@ function main(images)
 
 
    $('canvas').click(onClickCanvas);
-
    $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
    $('span.wall-budget'           ).html(gameState.wallBudget);
    $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);
@@ -129,6 +128,18 @@ function main(images)
 function initialiseGameGrid()
 {
    terrainGrid = generateTerrainGrid();
+//   let terrainGrid =
+//   [
+//      // Test data set.  To use, must set GRID_HEIGHT and GRID_WIDTH to match dimensions here.
+//      [11, 12, 14, 13, 12, 11, 10,  9],
+//      [13, 18, 18, 18, 18, 18, 15, 11],
+//      [16, 14, 17, 19, 17, 17, 13, 10],
+//      [14, 15, 19, 18, 19, 18, 14, 10],
+//      [13, 18, 19, 19, 19, 17, 12, 11],
+//      [12, 15, 17, 18, 17, 14, 11, 10],
+//      [11, 16, 16, 13, 15, 14, 16, 10],
+//      [10, 12, 12, 14, 12, 13, 14, 12],
+//   ];
 
    for (let x = 0; x < GRID_WIDTH; ++x)
    {
@@ -208,7 +219,7 @@ function generateTerrainGrid()
       }
    }
 
-   // Choose six random squares to be mountain tops.
+   // Choose N_MOUNTAINS_PER_MAP random squares to be mountain tops.
    // If the mountain tops happen to be on the same squares, that is no problem.
    for (let i = 0; i < N_MOUNTAINS_PER_MAP; ++i)
    {
@@ -219,7 +230,7 @@ function generateTerrainGrid()
       terrainGrid[mountainTopX][mountainTopY] = mountainHeight;
    }
 
-   for (var i = 0; i < MAX_TERRAIN_HEIGHT; ++i)
+   for (let i = 0; i < MAX_TERRAIN_HEIGHT; ++i)
    {
       let tempTerrainGrid = copyArray(terrainGrid);
 
@@ -488,8 +499,8 @@ function onClickCanvas(e)
    let canvasOffset = canvasJq.offset();
    let mouseX       = e.pageX - canvasOffset.left;
    let mouseY       = e.pageY - canvasOffset.top;
-   let mouseGridX   = Math.floor(mouseX / GRID_WIDTH );
-   let mouseGridY   = Math.floor(mouseY / GRID_HEIGHT);
+   let mouseGridX   = Math.floor(mouseX / SPRITE_WIDTH );
+   let mouseGridY   = Math.floor(mouseY / SPRITE_HEIGHT);
 
    drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
    rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
@@ -620,7 +631,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
    {
       if
       (
-         // If that square exists AND
+         // If that square is on the map AND
          //    that square's height is less than or equal to the current square's height AND
          //    we have not visited that square before...
          coord.x >= 0 && coord.x < GRID_WIDTH  &&
@@ -629,7 +640,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
          globalCoordsVisitedAsKeys['x:' + coord.x + ',' + coord.y] === undefined
       )
       {
-         // Find the lowest local grid coords from that square.
+         // Add the coordinates of that square to the array.
          allResultCoords.push(coord);
       }
    }
@@ -655,11 +666,13 @@ function findLocalLowestGridCoordsRecursively(x, y)
 
    if (gameState.gameMode == 'simulation')
    {
+      let halfSpriteHeight = SPRITE_HEIGHT / 2;
+      let halfSpriteWidth  = SPRITE_WIDTH  / 2;
       // Draw line from current grid square to new grid square.
       ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
       ctx.beginPath();                    // Start a path that will later be drawn.
-      ctx.moveTo(x                 * GRID_WIDTH + 16, y                 * GRID_HEIGHT + 16);
-      ctx.lineTo(lowerGridSquare.x * GRID_WIDTH + 16, lowerGridSquare.y * GRID_HEIGHT + 16);
+      ctx.moveTo(x                 * SPRITE_WIDTH + halfSpriteWidth, y                 * SPRITE_HEIGHT + halfSpriteHeight);
+      ctx.lineTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
       ctx.stroke();
    }
 
