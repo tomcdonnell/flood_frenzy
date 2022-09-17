@@ -29,17 +29,6 @@ div.buttons-div
    margin-bottom: 10px;
 }
 
-span.wall-budget-container
-{
-   border: 1px solid black;
-   display: inline-block;
-   font-size: 14px;
-   padding: 1px;
-   padding-left: 3px;
-   padding-right: 3px;
-   background-color: #88f;
-}
-
 div.color-key-div span.height-number-span
 {
    color: rgb(255, 255, 255);
@@ -171,14 +160,13 @@ table.high-scores-table td
   </p>
   <div class='buttons-div game'>
    <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
-   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls
   </div>
   <div class='buttons-div simulation' style='display:none'>
-   <button onclick='onClickGenerateNewTerrain()'>Generate new terrain</button>
-   <button onclick='onClickToggleHeightNumbers()'>Toggle numbers</button>
-   <button onclick='onClickRainOnRandomSquare()'>Rain on random square</button>
-   <button onclick='onClickRecedeFlood()'>Recede flood</button>
-   <span class='wall-budget-container'>Wall budget: <span class='wall-budget'></span></span> Click and drag on the map to build walls
+   <button onclick='onClickGenerateNewTerrain()'>Generate<br/>new terrain</button>
+   <button onclick='onClickToggleHeightNumbers()'>Toggle<br/>numbers</button>
+   <button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random square</button>
+   <button onclick='onClickRecedeFlood()'>Recede<br/>flood</button>
+   Click and drag on the map to build walls
   </div>
   <div class='color-key-div'>
    <div>Terrain height color key:</div>
@@ -309,7 +297,6 @@ table.high-scores-table td
    <ul>
     <li>Click and drag your mouse on the map to build walls</li>
     <li>Position your walls to protect houses before the floods arrive</li>
-    <li>Watch your wall budget so you don't run out of materials</li>
     <li>Be quick!  Flood waters will start rising immediately</li>
    </ul>
    <div class='skip-buttons-div'>

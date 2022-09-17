@@ -4,15 +4,14 @@
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const GRID_HEIGHT         =  32; // Vertical   dimension on screen (default 32).
-const GRID_WIDTH          =  32; // Horizontal dimension on screen (default 32).
-const INITIAL_WALL_BUDGET = 100;
-const MAX_TERRAIN_HEIGHT  =  20;
-const N_HOUSES_PER_MAP    =  35; // Default 35.
-const N_MOUNTAINS_PER_MAP =   6; // Default 6.
-const N_ROUNDS_PER_GAME   =   5;
-const SPRITE_HEIGHT       =  32; // Must match height of cell images (default 32).
-const SPRITE_WIDTH        =  32; // Must match width  of cell images (default 32).
+const GRID_HEIGHT         = 32; // Vertical   dimension on screen (default 32).
+const GRID_WIDTH          = 32; // Horizontal dimension on screen (default 32).
+const MAX_TERRAIN_HEIGHT  = 20;
+const N_HOUSES_PER_MAP    = 35; // Default 35.
+const N_MOUNTAINS_PER_MAP =  6; // Default 6.
+const N_ROUNDS_PER_GAME   =  5;
+const SPRITE_HEIGHT       = 32; // Must match height of cell images (default 32).
+const SPRITE_WIDTH        = 32; // Must match width  of cell images (default 32).
 
 let ctx = document.getElementById('canvas').getContext('2d');
 
@@ -34,8 +33,7 @@ let gameState                 =
    playerScore        : 0,
    roundNo            : 1,
    totalHousesLost    : 0,
-   totalHousesSaved   : 0,
-   wallBudget         : INITIAL_WALL_BUDGET
+   totalHousesSaved   : 0
 };
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +115,6 @@ function main(images)
 
    $('canvas').click(onClickCanvas);
    $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
-   $('span.wall-budget'           ).html(gameState.wallBudget);
    $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);
 
    onClickGameModeButton();
@@ -296,9 +293,7 @@ function onClickGameModeButton()
    gameState.nRainDropsFallen = 0;
    gameState.playerScore      = 0;
    gameState.roundNo          = 1;
-   gameState.wallBudget       = INITIAL_WALL_BUDGET;
-   $('span.wall-budget'  ).html(gameState.wallBudget);
-   $('span.round-no-span').html(gameState.roundNo   );
+   $('span.round-no-span').html(gameState.roundNo);
 
    initialiseGameGrid();
    drawGameGrid(false); // Initially draw the grid without the numbers.
@@ -320,9 +315,7 @@ function onClickSimulationModeButton()
    $('input#simulation-mode-button'      ).closest('label').addClass('selected');
    $('p.simulation-instructions'         ).show();
 
-   gameState.gameMode   = 'simulation';
-   gameState.wallBudget = INITIAL_WALL_BUDGET * 10;
-   $('span.wall-budget').html(gameState.wallBudget);
+   gameState.gameMode = 'simulation';
 }
 
 function onClickInformationModeButton()
@@ -381,12 +374,10 @@ function onClickContinueToNextRound()
 
 function onClickStartRound()
 {
-   gameState.floodIsReceding   = false;
-   gameState.gameMode          = 'game';
-   gameState.nHomesLost        = 0;
-   gameState.nRainDropsFallen  = 0;
-   gameState.wallBudget        = INITIAL_WALL_BUDGET;
-   $('span.wall-budget').html(gameState.wallBudget);
+   gameState.floodIsReceding  = false;
+   gameState.gameMode         = 'game';
+   gameState.nHomesLost       = 0;
+   gameState.nRainDropsFallen = 0;
 
    if (gameState.roundNo != 1)
    {
@@ -400,11 +391,7 @@ function onClickStartRound()
 function onClickGenerateNewTerrain()
 {
    initialiseGameGrid();
-
    drawGameGrid(gameState.gridNumbersAreShown); // Initially draw the grid without the numbers.
-
-   gameState.wallBudget = INITIAL_WALL_BUDGET;
-   $('span.wall-budget').html(gameState.wallBudget);
 }
 
 function onClickToggleHeightNumbers()
@@ -442,21 +429,12 @@ function onClickRecedeFlood()
    decreaseWaterLevelEverywhereByOne();
 }
 
-function onMouseUpCanvas(e)
-{
-   gameState.isBuildingWalls = false
-   $('span.walls-budget-container').css('border-color', 'black');
-}
-
-function onMouseDownCanvas(e)
-{
-   gameState.isBuildingWalls = true;
-   $('span.walls-budget-container').css('border-color', 'red');
-}
+function onMouseUpCanvas(e)   {gameState.isBuildingWalls = false;}
+function onMouseDownCanvas(e) {gameState.isBuildingWalls = true ;}
 
 function onMouseMoveCanvas(e)
 {
-   if (gameState.isBuildingWalls && gameState.wallBudget > 0)
+   if (gameState.isBuildingWalls)
    {
       let canvasJq     = $('canvas');
       let canvasOffset = canvasJq.offset();
