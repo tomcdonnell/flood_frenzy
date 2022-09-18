@@ -31,22 +31,18 @@ div.buttons-div
 
 div.buttons-div.simulation button
 {
-   padding: 9px;
+   padding: 5px;
+   margin-bottom: 5px;
+   margin-right: 5px;
+   width: 120px;
 }
 
 div.buttons-div > span
 {
-   display: inline-block;
-}
-
-div.buttons-div > span.table-container
-{
-   vertical-align: bottom;
-}
-
-div.buttons-div > span.table-container > table
-{
    border: 1px solid black;
+   display: inline-block;
+   height: 110px;
+   padding: 8px;
 }
 
 div.color-key-div img
@@ -187,7 +183,7 @@ table.high-scores-table td
    <button onclick='onClickToggleHeightNumbers()'>Toggle height numbers</button>
   </div>
   <div class='buttons-div simulation' style='display:none'>
-   <span class='table-container'>
+   <span>
     <table>
      <tbody>
       <tr>
@@ -249,11 +245,27 @@ table.high-scores-table td
     </table>
    </span>
    <span>
-    <button onclick='onClickToggleHeightNumbers()'>Toggle<br/>numbers</button>
-    <button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random square</button>
-    <button onclick='onClickRecedeFlood()'>Recede<br/>flood</button>
+    <table>
+     <tbody>
+      <tr>
+       <td><button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random square</button></td>
+       <td><button onclick='onClickRainOnAllSquares()'>Rain on<br/>all squares</button></td>
+      </tr>
+       <td><button onclick='onClickToggleHeightNumbers()'>Toggle<br/>numbers</button></td>
+       <td><button onclick='onClickRecedeFlood()'>Recede<br/>flood</button></td>
+      </tr>
+     </tbody>
+    </table>
    </span>
-   <span>Click and drag on the map to build walls</span>
+   <span>
+    <table>
+     <tbody>
+      <tr>
+       <td>Click and drag on the map<br/>to build walls</td>
+      </tr>
+     </tbody>
+    </table>
+   </span>
   </div>
   <div class='color-key-div'>
    <div>Terrain height color key:</div>
