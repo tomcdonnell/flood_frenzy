@@ -729,15 +729,15 @@ function getAvgHeightOfSurroundingSquares(x, y)
    let n   = 0;
    let sum = 0;
 
-   if (y > 0               && x > 0             ) {sum += Number(terrainGrid[x - 1][y - 1]); ++n;} // top-left.
-   if (y > 0                                    ) {sum += Number(terrainGrid[x    ][y - 1]); ++n;} // top-middle.
-   if (y > 0               && x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y - 1]); ++n;} // top-right.
+   if (y > 0                        && x > 0                      ) {sum += Number(terrainGrid[x - 1][y - 1]); ++n;} // top-left.
+   if (y > 0                                                      ) {sum += Number(terrainGrid[x    ][y - 1]); ++n;} // top-middle.
+   if (y > 0                        && x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y - 1]); ++n;} // top-right.
 
-   if (                       x > 0             ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
-   if (                       x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
+   if (                                x > 0                      ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
+   if (                                x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
 
-   if (y < gameState.gridHeight - 1 && x > 0             ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
-   if (y < gameState.gridHeight - 1                      ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
+   if (y < gameState.gridHeight - 1 && x > 0                      ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
+   if (y < gameState.gridHeight - 1                               ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
    if (y < gameState.gridHeight - 1 && x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
 
    return ((n > 0)? Math.floor(sum / n): 0);
@@ -746,17 +746,18 @@ function getAvgHeightOfSurroundingSquares(x, y)
 function getHeightOfHighestNeighbour(x, y)
 {
    let highestH = 0;
+   let g        = gameState;
 
-   if (y > 0               && x > 0             ) {let h = Number(terrainGrid[x - 1][y - 1]); if (h > highestH) {highestH = h;}} // top-left.
-   if (y > 0                                    ) {let h = Number(terrainGrid[x    ][y - 1]); if (h > highestH) {highestH = h;}} // top-middle.
-   if (y > 0               && x < gameState.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y - 1]); if (h > highestH) {highestH = h;}} // top-right.
+   if (y > 0                && x > 0              ) {let h = Number(terrainGrid[x - 1][y - 1]); if (h > highestH) {highestH = h;}} // top-left.
+   if (y > 0                                      ) {let h = Number(terrainGrid[x    ][y - 1]); if (h > highestH) {highestH = h;}} // top-middle.
+   if (y > 0                && x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y - 1]); if (h > highestH) {highestH = h;}} // top-right.
 
-   if (                       x > 0             ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
-   if (                       x < gameState.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
+   if (                        x > 0              ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
+   if (                        x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
 
-   if (y < gameState.gridHeight - 1 && x > 0             ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
-   if (y < gameState.gridHeight - 1                      ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
-   if (y < gameState.gridHeight - 1 && x < gameState.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
+   if (y < g.gridHeight - 1 && x > 0              ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
+   if (y < g.gridHeight - 1                       ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
+   if (y < g.gridHeight - 1 && x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
 
    return highestH;
 }
@@ -764,17 +765,18 @@ function getHeightOfHighestNeighbour(x, y)
 function terrainSquareHasNonNullNeighbour(x, y)
 {
    let highestH = 0;
+   let g        = gameState;
 
-   if (y > 0               && x > 0             ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
-   if (y > 0                                    ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
-   if (y > 0               && x < gameState.gridWidth - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
+   if (y > 0                && x > 0              ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
+   if (y > 0                                      ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
+   if (y > 0                && x < g.gridWidth - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
 
-   if (                       x > 0             ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
-   if (                       x < gameState.gridWidth - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
+   if (                        x > 0              ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
+   if (                        x < g.gridWidth - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
 
-   if (y < gameState.gridHeight - 1 && x > 0             ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
-   if (y < gameState.gridHeight - 1                      ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
-   if (y < gameState.gridHeight - 1 && x < gameState.gridWidth - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
+   if (y < g.gridHeight - 1 && x > 0              ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
+   if (y < g.gridHeight - 1                       ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
+   if (y < g.gridHeight - 1 && x < g.gridWidth - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
 
    return false;
 }
