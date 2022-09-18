@@ -1,6 +1,0 @@
-Video script
-------------
-
-Hi, my name is Tom McDonnell.  I'm going to give you a quick tour of the game my team has created for GovHack 2022.
-
-We have created a game and a simulation of 

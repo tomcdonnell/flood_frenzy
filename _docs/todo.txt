@@ -1,31 +1,25 @@
 TODO
 ----
- * Add houses
- * Count houses at end of each round
- * Scoring
- * Information page (with links to data sources)
- * High scores page
  * Between rounds quips
    [
       [
          ['mayor'    , 'Just how big are these floods going to be Professor?'],
-         ['professor', 'This will be a Category 9 Mega-Storm.  We've never been a stom above category 6.']
+         ['professor', 'This will be a Category 9 Mega-Storm.  We've never seen a stom above category 6.']
       ],
       [
          ['mayor'  , 'I thought you said your Wall Builder was the best?'],
          ['general', 'I was telling you what he told me!']
       ],
    ]
+ * Game mode
+    * Rain on water squares only.  That way flood always comes from existing water sources.  This will be more intuitive for players.
+ * Simulation mode
+    * Rain on all squares to show formation of streams and rivers
+       * Do not raise water level while doing this
+       * Keep count of the number of times a water line has been used, and make thickness of line proportional to number of rain drops that use path.
 
- * IMPORTANT
-    * Upload game to server
-    * Write project description
-    * Video
 
 For Arran
 ---------
- * Professor/Scientist image
- * Title in pixel-art 'Flood Frenzy'
+ * TV reporter image
  * Improve transitions between color grid squares
- * Figure out how to join two videos together
-  
