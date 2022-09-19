@@ -666,7 +666,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
       ctx.beginPath();                    // Start a path that will later be drawn.
       ctx.moveTo(x * SPRITE_WIDTH + halfSpriteWidth, y * SPRITE_HEIGHT + halfSpriteHeight);
 
-      if (gameGrid[x][y].height > 1)
+      if (gameGrid[x][y].height > 0)
       {
          ctx.lineTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
       }
