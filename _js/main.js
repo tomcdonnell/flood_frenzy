@@ -441,8 +441,8 @@ function onMouseMoveCanvas(e)
       let canvasOffset = canvasJq.offset();
       let mouseX       = e.pageX - canvasOffset.left;
       let mouseY       = e.pageY - canvasOffset.top;
-      let mouseGridX   = Math.floor(mouseX / gameState.gridWidth );
-      let mouseGridY   = Math.floor(mouseY / gameState.gridHeight);
+      let mouseGridX   = Math.floor(mouseX / SPRITE_WIDTH );
+      let mouseGridY   = Math.floor(mouseY / SPRITE_HEIGHT);
 
       if (mouseGridX > gameState.gridWidth || mouseGridY > gameState.gridHeight)
       {
