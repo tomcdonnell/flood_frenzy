@@ -422,7 +422,18 @@ function onClickRainOnRandomSquare()
    }
 
    drawTextOnGridSquare(rainX, rainY, 'R');
-   rainUntilWaterLevelRisesByOne(rainX, rainY);
+   rainUntilWaterLevelRisesByOne(rainX, rainY, true);
+}
+
+function onClickRainOnAllSquares()
+{
+   for (let x = 0; x < gameState.gridWidth; ++x)
+   {
+      for (let y = 0; y < gameState.gridHeight; ++y)
+      {
+         rainUntilWaterLevelRisesByOne(x, y, false);
+      }
+   }
 }
 
 function onClickRecedeFlood()
@@ -482,7 +493,7 @@ function onClickCanvas(e)
    let mouseGridY   = Math.floor(mouseY / SPRITE_HEIGHT);
 
    drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
-   rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY);
+   rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY, true);
 }
 
 // Flood functions. //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +533,7 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
          }
       }
 
-      rainUntilWaterLevelRisesByOne(rainX, rainY);
+      rainUntilWaterLevelRisesByOne(rainX, rainY, true);
 
       if (getPercentageOfGridUnderwater() > 50)
       {
@@ -564,7 +575,7 @@ function decreaseWaterLevelEverywhereByOne()
    }
 }
 
-function rainUntilWaterLevelRisesByOne(rainX, rainY)
+function rainUntilWaterLevelRisesByOne(rainX, rainY, boolIncreaseFloodLevel)
 {
    globalCoordsVisitedAsKeys = {}; // Clear this before calling recursive function.
    let localPoolBottomCoords = findLocalLowestGridCoordsRecursively(rainX, rainY);
@@ -580,8 +591,11 @@ function rainUntilWaterLevelRisesByOne(rainX, rainY)
       drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
    }
 
-   let targetWaterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
-   addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y, targetWaterLevel);
+   if (boolIncreaseFloodLevel)
+   {
+      let targetWaterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
+      addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y, targetWaterLevel);
+   }
 
    ++gameState.nRainDropsFallen;
 }
@@ -650,8 +664,17 @@ function findLocalLowestGridCoordsRecursively(x, y)
       // Draw line from current grid square to new grid square.
       ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
       ctx.beginPath();                    // Start a path that will later be drawn.
-      ctx.moveTo(x                 * SPRITE_WIDTH + halfSpriteWidth, y                 * SPRITE_HEIGHT + halfSpriteHeight);
-      ctx.lineTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
+      ctx.moveTo(x * SPRITE_WIDTH + halfSpriteWidth, y * SPRITE_HEIGHT + halfSpriteHeight);
+
+      if (gameGrid[x][y].height > 1)
+      {
+         ctx.lineTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
+      }
+      else
+      {
+         ctx.moveTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
+      }
+
       ctx.stroke();
    }
 
