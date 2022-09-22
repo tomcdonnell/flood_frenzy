@@ -14,14 +14,14 @@ let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visi
 let globalImages              = [];
 let gameGrid                  = [];
 let terrainGrid               = [];
+//let nWaterPathsByKey          = {}; // Keys are in format 'x,y->x,y' TODO: Record this info as rain falls so stream with can be proportional to nWaterPaths for an
 let gameState                 =
 {
    floodIsReceding    : false ,
    gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
-   gridHeight         : 32    , // Default 32.
+   gridHeight         : null  ,
    gridNumbersAreShown: false ,
-   gridWidth          : 32    , // Default 32.
-   hasHouse           : true  ,
+   gridWidth          : null  ,
    isBuildingWalls    : false ,
    nHomesLost         : 0     ,
    playerScore        : 0     ,
@@ -120,32 +120,33 @@ function initialiseGameGrid()
    gameState.gridHeight = $('select#grid-size').val();
    gameState.gridWidth  = $('select#grid-size').val();
    terrainGrid          = generateTerrainGrid();
-//   let terrainGrid =
+//   terrainGrid          =
 //   [
 //      // Test data set.  To use, must set gameState.gridHeight and gameState.gridWidth to match dimensions here.
-//      [11, 12, 14, 13, 12, 11, 10,  9],
-//      [13, 18, 18, 18, 18, 18, 15, 11],
-//      [16, 14, 17, 19, 17, 17, 13, 10],
-//      [14, 15, 19, 18, 19, 18, 14, 10],
-//      [13, 18, 19, 19, 19, 17, 12, 11],
-//      [12, 15, 17, 18, 17, 14, 11, 10],
-//      [11, 16, 16, 13, 15, 14, 16, 10],
-//      [10, 12, 12, 14, 12, 13, 14, 12],
+//      [19, 19, 19, 19, 19, 19, 19,  9],
+//      [19, 18, 19,  0,  1,  2,  3, 10],
+//      [19, 17, 19, 19, 19, 19,  4, 11],
+//      [19, 16, 19, 12, 17, 19,  5, 12],
+//      [19, 15, 19, 13, 16, 19,  6, 13],
+//      [19, 14, 19, 19, 19, 19,  7, 14],
+//      [19, 13, 12, 11, 10,  9,  8, 15],
+//      [19, 19, 19, 19, 19, 19, 19, 16],
 //   ];
 
-   for (let x = 0; x < gameState.gridWidth; ++x)
+   for (let r = 0; r < gameState.gridHeight; ++r)
    {
-      gameGrid[x] = [];
+      gameGrid[r] = [];
 
-      for (let y = 0; y < gameState.gridHeight; ++y)
+      for (let c = 0; c < gameState.gridWidth; ++c)
       {
-         let gridSquareHeight = terrainGrid[x][y];
+         let gridSquareHeight = terrainGrid[r][c];
 
-         gameGrid[x][y] =
+         gameGrid[r][c] =
          {
+            hasHouse    : false           ,
             height      : gridSquareHeight,
             heightOrig  : gridSquareHeight, // Used when the flood recedes.
-            isWall      : false,
+            isWall      : false           ,
             isUnderwater: (gridSquareHeight <= 1)
          }
       }
@@ -156,9 +157,9 @@ function initialiseGameGrid()
    let nHousesPerMap = $('select#n-houses').val();
    while (nHousesAdded < nHousesPerMap)
    {
-      let houseX          = getRandomInt(0, gameState.gridWidth );
-      let houseY          = getRandomInt(0, gameState.gridHeight);
-      let houseGridSquare = gameGrid[houseX][houseY];
+      let houseR          = getRandomInt(0, gameState.gridHeight);
+      let houseC          = getRandomInt(0, gameState.gridWidth );
+      let houseGridSquare = gameGrid[houseR][houseC];
 
       if (3 < houseGridSquare.height && houseGridSquare.height < 15)
       {
@@ -173,15 +174,15 @@ function drawGameGrid(boolDrawHeightNumbersOnSquares)
    ctx.canvas.width  = gameState.gridWidth  * SPRITE_WIDTH ;
    ctx.canvas.height = gameState.gridHeight * SPRITE_HEIGHT;
 
-   for (let x = 0; x < gameState.gridWidth; ++x)
+   for (let r = 0; r < gameState.gridHeight; ++r)
    {
-      for (let y = 0; y < gameState.gridHeight; ++y)
+      for (let c = 0; c < gameState.gridWidth; ++c)
       {
-         let gridSquareObj = gameGrid[x][y];
+         let gridSquareObj = gameGrid[r][c];
 
          if (gridSquareObj.height < 0 || gridSquareObj.height > 19)
          {
-            throw 'Grid square [' + x + '][' + y + '] height (' + gridSquareObj.height + ') out of expected range.';
+            throw 'Grid square [' + r + '][' + c + '] height (' + gridSquareObj.height + ') out of expected range.';
          }
 
          let imageForGridSquare =
@@ -193,11 +194,11 @@ function drawGameGrid(boolDrawHeightNumbersOnSquares)
             )
          );
 
-         drawSpriteOnGridSquare(x, y, imageForGridSquare);
+         drawSpriteOnGridSquare(r, c, imageForGridSquare);
 
          if (boolDrawHeightNumbersOnSquares)
          {
-            drawTextOnGridSquare(x, y, gridSquareObj.height);
+            drawTextOnGridSquare(r, c, gridSquareObj.height);
          }
       }
    }
@@ -406,23 +407,23 @@ function onClickToggleHeightNumbers()
 
 function onClickRainOnRandomSquare()
 {
-   let rainX         = null;
-   let rainY         = null;
+   let rainR         = null;
+   let rainC         = null;
    let squareIsValid = false;
 
    while (!squareIsValid)
    {
-      rainX = getRandomInt(0, gameState.gridWidth );
-      rainY = getRandomInt(0, gameState.gridHeight);
+      rainR = getRandomInt(0, gameState.gridHeight);
+      rainC = getRandomInt(0, gameState.gridWidth );
 
-      if (!gameGrid[rainX][rainY].isWall)
+      if (!gameGrid[rainR][rainC].isWall)
       {
          squareIsValid = true;
       }
    }
 
-   drawTextOnGridSquare(rainX, rainY, 'R');
-   rainUntilWaterLevelRisesByOne(rainX, rainY, true);
+   drawTextOnGridSquare(rainR, rainC, 'R');
+   rainUntilWaterLevelRisesByOne(rainR, rainC, true);
 }
 
 function onClickRainOnAllSquares()
@@ -452,19 +453,19 @@ function onMouseMoveCanvas(e)
       let canvasOffset = canvasJq.offset();
       let mouseX       = e.pageX - canvasOffset.left;
       let mouseY       = e.pageY - canvasOffset.top;
-      let mouseGridX   = Math.floor(mouseX / SPRITE_WIDTH );
-      let mouseGridY   = Math.floor(mouseY / SPRITE_HEIGHT);
+      let mouseGridR   = Math.floor(mouseY / SPRITE_HEIGHT);
+      let mouseGridC   = Math.floor(mouseX / SPRITE_WIDTH );
 
-      if (mouseGridX > gameState.gridWidth || mouseGridY > gameState.gridHeight)
+      if (mouseGridR > gameState.gridHeight || mouseGridC > gameState.gridWidth)
       {
          throw new Exception('Mouse grid coordinates out of expected range.');
       }
 
-      if (gameGrid[mouseGridX][mouseGridY].height < MAX_TERRAIN_HEIGHT - 1)
+      if (gameGrid[mouseGridR][mouseGridC].height < MAX_TERRAIN_HEIGHT - 1)
       {
-         drawSpriteOnGridSquare(mouseGridX, mouseGridY, globalImages[20]);
-         gameGrid[mouseGridX][mouseGridY].isWall = true;
-         gameGrid[mouseGridX][mouseGridY].height = 19;
+         drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[20]);
+         gameGrid[mouseGridR][mouseGridC].isWall = true;
+         gameGrid[mouseGridR][mouseGridC].height = 19;
 
          --gameState.wallBudget;
 
@@ -472,7 +473,7 @@ function onMouseMoveCanvas(e)
 
          if (gameState.gridNumbersAreShown)
          {
-            drawTextOnGridSquare(mouseGridX, mouseGridY, gameGrid[mouseGridX][mouseGridY].height);
+            drawTextOnGridSquare(mouseGridR, mouseGridC, gameGrid[mouseGridR][mouseGridC].height);
          }
       }
    }
@@ -489,11 +490,11 @@ function onClickCanvas(e)
    let canvasOffset = canvasJq.offset();
    let mouseX       = e.pageX - canvasOffset.left;
    let mouseY       = e.pageY - canvasOffset.top;
-   let mouseGridX   = Math.floor(mouseX / SPRITE_WIDTH );
-   let mouseGridY   = Math.floor(mouseY / SPRITE_HEIGHT);
+   let mouseGridR   = Math.floor(mouseY / SPRITE_HEIGHT);
+   let mouseGridC   = Math.floor(mouseX / SPRITE_WIDTH );
 
-   drawTextOnGridSquare(mouseGridX, mouseGridY, 'R');
-   rainUntilWaterLevelRisesByOne(mouseGridX, mouseGridY, true);
+   drawTextOnGridSquare(mouseGridR, mouseGridC, 'R');
+   rainUntilWaterLevelRisesByOne(mouseGridR, mouseGridC, true);
 }
 
 // Flood functions. //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -518,22 +519,22 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
    }
    else
    {
-      let rainX         = null;
-      let rainY         = null;
+      let rainR         = null;
+      let rainC         = null;
       let squareIsValid = false;
 
       while (!squareIsValid)
       {
-         rainX = getRandomInt(0, gameState.gridWidth );
-         rainY = getRandomInt(0, gameState.gridHeight);
+         rainR = getRandomInt(0, gameState.gridHeight);
+         rainC = getRandomInt(0, gameState.gridWidth );
 
-         if (!gameGrid[rainX][rainY].isWall)
+         if (!gameGrid[rainR][rainC].isWall)
          {
             squareIsValid = true;
          }
       }
 
-      rainUntilWaterLevelRisesByOne(rainX, rainY, true);
+      rainUntilWaterLevelRisesByOne(rainR, rainC, true);
 
       if (getPercentageOfGridUnderwater() > 50)
       {
@@ -547,76 +548,76 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
 function decreaseWaterLevelEverywhereByOne()
 {
    // Decrease water level everyone by one.
-   for (let x = 0; x < gameState.gridWidth; ++x)
+   for (let r = 0; r < gameState.gridHeight; ++r)
    {
-      for (let y = 0; y < gameState.gridHeight; ++y)
+      for (let c = 0; c < gameState.gridWidth; ++c)
       {
-         if (gameGrid[x][y].height > gameGrid[x][y].heightOrig)
+         if (gameGrid[r][c].height > gameGrid[r][c].heightOrig)
          {
-            --gameGrid[x][y].height;
+            --gameGrid[r][c].height;
 
-            if (gameGrid[x][y].height == gameGrid[x][y].heightOrig)
+            if (gameGrid[r][c].height == gameGrid[r][c].heightOrig)
             {
-               gameGrid[x][y].isUnderwater = (gameGrid[x][y].heightOrig <= 1);
+               gameGrid[r][c].isUnderwater = (gameGrid[r][c].heightOrig <= 1);
 
                let imageIndex =
                (
-                  (gameGrid[x][y].hasHouse)? 22:
+                  (gameGrid[r][c].hasHouse)? 22:
                   (
-                     (gameGrid[x][y].isWall)? 20:
-                     gameGrid[x][y].height
+                     (gameGrid[r][c].isWall)? 20:
+                     gameGrid[r][c].height
                   )
                );
 
-               drawSpriteOnGridSquare(x, y, globalImages[imageIndex]);
+               drawSpriteOnGridSquare(r, c, globalImages[imageIndex]);
             }
          }
       }
    }
 }
 
-function rainUntilWaterLevelRisesByOne(rainX, rainY, boolIncreaseFloodLevel)
+function rainUntilWaterLevelRisesByOne(rainR, rainC, boolIncreaseFloodLevel)
 {
    globalCoordsVisitedAsKeys = {}; // Clear this before calling recursive function.
-   let localPoolBottomCoords = findLocalLowestGridCoordsRecursively(rainX, rainY);
+   let localPoolBottomCoords = findLocalLowestGridCoordsRecursively(rainR, rainC);
 
    if (localPoolBottomCoords === null)
    {
       // Grid coords returned being null means the submitted coords are a local minimum.
-      localPoolBottomCoords = {x: rainX, y: rainY};
+      localPoolBottomCoords = {r: rainR, c: rainC};
    }
 
    if (gameState.gridNumbersAreShown)
    {
-      drawTextOnGridSquare(localPoolBottomCoords.x, localPoolBottomCoords.y, 'M'); // Mark local minima.
+      drawTextOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, 'M'); // Mark local minima.
    }
 
    if (boolIncreaseFloodLevel)
    {
-      let targetWaterLevel = gameGrid[localPoolBottomCoords.x][localPoolBottomCoords.y].height + 1;
-      addWaterUpToWaterLevelRecursively(localPoolBottomCoords.x, localPoolBottomCoords.y, targetWaterLevel);
+      let targetWaterLevel = gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].height + 1;
+      addWaterUpToWaterLevelRecursively(localPoolBottomCoords.r, localPoolBottomCoords.c, targetWaterLevel);
    }
 
    ++gameState.nRainDropsFallen;
 }
 
-function findLocalLowestGridCoordsRecursively(x, y)
+function findLocalLowestGridCoordsRecursively(r, c)
 {
-   globalCoordsVisitedAsKeys['x:' + x + ',' + y] = true;
+   globalCoordsVisitedAsKeys[r + ',' + c] = true;
 
    // Collect all the results so we can filter and sort them.
-   let currentSquareHeight = gameGrid[x][y];
+   let currentSquareHeight = gameGrid[r][c];
    let allResultCoords     = [];
    let neighbourCoords     =
    [
-      {x: x - 1, y: y - 1}, // TL.
-      {x: x    , y: y - 1}, // TM.
-      {x: x + 1, y: y - 1}, // TR.
-      {x: x - 1, y: y    }, // ML.
-      {x: x + 1, y: y    }, // MR.
-      {x: x - 1, y: y + 1}, // BL.
-      {x: x    , y: y + 1}, // BM.
-      {x: x + 1, y: y + 1}  // BR.
+      {r: r - 1, c: c - 1}, // TL.
+      {r: r - 1, c: c    }, // TM.
+      {r: r - 1, c: c + 1}, // TR.
+      {r: r    , c: c - 1}, // ML.
+      {r: r    , c: c + 1}, // MR.
+      {r: r + 1, c: c - 1}, // BL.
+      {r: r + 1, c: c    }, // BM.
+      {r: r + 1, c: c + 1}  // BR.
    ];
 
    // For each neighbouring square...
@@ -627,10 +628,10 @@ function findLocalLowestGridCoordsRecursively(x, y)
          // If that square is on the map AND
          //    that square's height is less than or equal to the current square's height AND
          //    we have not visited that square before...
-         coord.x >= 0 && coord.x < gameState.gridWidth  &&
-         coord.y >= 0 && coord.y < gameState.gridHeight &&
-         gameGrid[coord.x][coord.y].height <= gameGrid[x][y].height &&
-         globalCoordsVisitedAsKeys['x:' + coord.x + ',' + coord.y] === undefined
+         coord.r >= 0 && coord.r < gameState.gridHeight &&
+         coord.c >= 0 && coord.c < gameState.gridWidth  &&
+         gameGrid[coord.r][coord.c].height <= gameGrid[r][c].height &&
+         globalCoordsVisitedAsKeys[coord.r + ',' + coord.c] === undefined
       )
       {
          // Add the coordinates of that square to the array.
@@ -641,7 +642,7 @@ function findLocalLowestGridCoordsRecursively(x, y)
    if (allResultCoords.length == 0)
    {
       // None of the neighbouring squares is lower, so return the given coordinates.
-      return {x: x, y: y};
+      return {r: r, c: c};
    }
 
    // Sort by height ascending.
@@ -649,8 +650,8 @@ function findLocalLowestGridCoordsRecursively(x, y)
    (
       function compare(a, b)
       {
-         let aHeight = gameGrid[a.x][a.y].height;
-         let bHeight = gameGrid[b.x][b.y].height;
+         let aHeight = gameGrid[a.r][a.c].height;
+         let bHeight = gameGrid[b.r][b.c].height;
          return ((aHeight === bHeight)? 0: ((aHeight > bHeight)? 1: -1));
       }
    );
@@ -664,51 +665,54 @@ function findLocalLowestGridCoordsRecursively(x, y)
       // Draw line from current grid square to new grid square.
       ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
       ctx.beginPath();                    // Start a path that will later be drawn.
-      ctx.moveTo(x * SPRITE_WIDTH + halfSpriteWidth, y * SPRITE_HEIGHT + halfSpriteHeight);
+      ctx.moveTo(c * SPRITE_WIDTH + halfSpriteWidth, r * SPRITE_HEIGHT + halfSpriteHeight);
 
-      if (gameGrid[x][y].height > 0)
+      if (gameGrid[r][c].height > 0)
       {
-         ctx.lineTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
+         ctx.lineTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
       }
       else
       {
-         ctx.moveTo(lowerGridSquare.x * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.y * SPRITE_HEIGHT + halfSpriteHeight);
+         ctx.moveTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
       }
+
+      // Set line width.
+      ctx.lineWidth = 3;
 
       ctx.stroke();
    }
 
    // Return the coordinates of the lowest neighbouring grid square.
-   return findLocalLowestGridCoordsRecursively(lowerGridSquare.x, lowerGridSquare.y);
+   return findLocalLowestGridCoordsRecursively(lowerGridSquare.r, lowerGridSquare.c);
 }
 
-function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
+function addWaterUpToWaterLevelRecursively(r, c, targetWaterLevel)
 {
    if
    (
       // If current square exists AND
       //    current square's height is less than the water level...
-      x >= 0 && x < gameState.gridWidth  &&
-      y >= 0 && y < gameState.gridHeight &&
-      gameGrid[x][y].height < targetWaterLevel
+      r >= 0 && r < gameState.gridHeight &&
+      c >= 0 && c < gameState.gridWidth  &&
+      gameGrid[r][c].height < targetWaterLevel
    )
    {
-      gameGrid[x][y].height = targetWaterLevel;
-      drawSpriteOnGridSquare(x, y, globalImages[0]);
+      gameGrid[r][c].height = targetWaterLevel;
+      drawSpriteOnGridSquare(r, c, globalImages[0]);
    }
 
-   let currentSquareHeight = gameGrid[x][y];
+   let currentSquareHeight = gameGrid[r][c];
    let allResultCoords     = [];
    let neighbourCoords     =
    [
-      {x: x - 1, y: y - 1}, // TL.
-      {x: x    , y: y - 1}, // TM.
-      {x: x + 1, y: y - 1}, // TR.
-      {x: x - 1, y: y    }, // ML.
-      {x: x + 1, y: y    }, // MR.
-      {x: x - 1, y: y + 1}, // BL.
-      {x: x    , y: y + 1}, // BM.
-      {x: x + 1, y: y + 1}  // BR.
+      {r: r - 1, c: c - 1}, // TL.
+      {r: r - 1, c: c    }, // TM.
+      {r: r - 1, c: c + 1}, // TR.
+      {r: r    , c: c - 1}, // ML.
+      {r: r    , c: c + 1}, // MR.
+      {r: r + 1, c: c - 1}, // BL.
+      {r: r + 1, c: c    }, // BM.
+      {r: r + 1, c: c + 1}  // BR.
    ];
 
    for (let coord of neighbourCoords)
@@ -717,18 +721,18 @@ function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
       (
          // If that square exists AND
          //    that square's height is less than the water level...
-         coord.x >= 0 && coord.x < gameState.gridWidth  &&
-         coord.y >= 0 && coord.y < gameState.gridHeight &&
-         gameGrid[coord.x][coord.y].height < targetWaterLevel
+         coord.r >= 0 && coord.r < gameState.gridHeight &&
+         coord.c >= 0 && coord.c < gameState.gridWidth  &&
+         gameGrid[coord.r][coord.c].height < targetWaterLevel
       )
       {
-         gameGrid[coord.x][coord.y].height = targetWaterLevel;
+         gameGrid[coord.r][coord.c].height = targetWaterLevel;
 
          let imageIndex = 0;
 
-         if (gameGrid[coord.x][coord.y].hasHouse)
+         if (gameGrid[coord.r][coord.c].hasHouse)
          {
-            if (!gameGrid[coord.x][coord.y].isUnderwater)
+            if (!gameGrid[coord.r][coord.c].isUnderwater)
             {
                ++gameState.nHomesLost;
             }
@@ -736,70 +740,70 @@ function addWaterUpToWaterLevelRecursively(x, y, targetWaterLevel)
             imageIndex = 22;
          }
 
-         gameGrid[coord.x][coord.y].isUnderwater = true;
+         gameGrid[coord.r][coord.c].isUnderwater = true;
 
-         drawSpriteOnGridSquare(coord.x, coord.y, globalImages[imageIndex]);
+         drawSpriteOnGridSquare(coord.r, coord.c, globalImages[imageIndex]);
 
-         addWaterUpToWaterLevelRecursively(coord.x, coord.y, targetWaterLevel);
+         addWaterUpToWaterLevelRecursively(coord.r, coord.c, targetWaterLevel);
       }
    }
 }
 
 // Utility functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function getAvgHeightOfSurroundingSquares(x, y)
+function getAvgHeightOfSurroundingSquares(r, c)
 {
    let n   = 0;
    let sum = 0;
 
-   if (y > 0                        && x > 0                      ) {sum += Number(terrainGrid[x - 1][y - 1]); ++n;} // top-left.
-   if (y > 0                                                      ) {sum += Number(terrainGrid[x    ][y - 1]); ++n;} // top-middle.
-   if (y > 0                        && x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y - 1]); ++n;} // top-right.
+   if (r > 0                        && c > 0                      ) {sum += Number(terrainGrid[r - 1][c - 1]); ++n;} // top-left.
+   if (r > 0                                                      ) {sum += Number(terrainGrid[r - 1][c    ]); ++n;} // top-middle.
+   if (r > 0                        && c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r - 1][c + 1]); ++n;} // top-right.
 
-   if (                                x > 0                      ) {sum += Number(terrainGrid[x - 1][y    ]); ++n;} // left.
-   if (                                x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y    ]); ++n;} // right.
+   if (                                c > 0                      ) {sum += Number(terrainGrid[r    ][c - 1]); ++n;} // left.
+   if (                                c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r    ][c + 1]); ++n;} // right.
 
-   if (y < gameState.gridHeight - 1 && x > 0                      ) {sum += Number(terrainGrid[x - 1][y + 1]); ++n;} // bottom-left.
-   if (y < gameState.gridHeight - 1                               ) {sum += Number(terrainGrid[x    ][y + 1]); ++n;} // bottom-middle.
-   if (y < gameState.gridHeight - 1 && x < gameState.gridWidth - 1) {sum += Number(terrainGrid[x + 1][y + 1]); ++n;} // bottom-right.
+   if (r < gameState.gridHeight - 1 && c > 0                      ) {sum += Number(terrainGrid[r + 1][c - 1]); ++n;} // bottom-left.
+   if (r < gameState.gridHeight - 1                               ) {sum += Number(terrainGrid[r + 1][c    ]); ++n;} // bottom-middle.
+   if (r < gameState.gridHeight - 1 && c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r + 1][c + 1]); ++n;} // bottom-right.
 
    return ((n > 0)? Math.floor(sum / n): 0);
 }
 
-function getHeightOfHighestNeighbour(x, y)
+function getHeightOfHighestNeighbour(r, c)
 {
    let highestH = 0;
    let g        = gameState;
 
-   if (y > 0                && x > 0              ) {let h = Number(terrainGrid[x - 1][y - 1]); if (h > highestH) {highestH = h;}} // top-left.
-   if (y > 0                                      ) {let h = Number(terrainGrid[x    ][y - 1]); if (h > highestH) {highestH = h;}} // top-middle.
-   if (y > 0                && x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y - 1]); if (h > highestH) {highestH = h;}} // top-right.
+   if (r > 0                && c > 0              ) {let h = Number(terrainGrid[r - 1][c - 1]); if (h > highestH) {highestH = h;}} // top-left.
+   if (r > 0                                      ) {let h = Number(terrainGrid[r - 1][c    ]); if (h > highestH) {highestH = h;}} // top-middle.
+   if (r > 0                && c < g.gridWidth - 1) {let h = Number(terrainGrid[r - 1][c + 1]); if (h > highestH) {highestH = h;}} // top-right.
 
-   if (                        x > 0              ) {let h = Number(terrainGrid[x - 1][y    ]); if (h > highestH) {highestH = h;}} // left.
-   if (                        x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y    ]); if (h > highestH) {highestH = h;}} // right.
+   if (                        c > 0              ) {let h = Number(terrainGrid[r    ][c - 1]); if (h > highestH) {highestH = h;}} // left.
+   if (                        c < g.gridWidth - 1) {let h = Number(terrainGrid[r    ][c + 1]); if (h > highestH) {highestH = h;}} // right.
 
-   if (y < g.gridHeight - 1 && x > 0              ) {let h = Number(terrainGrid[x - 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-left.
-   if (y < g.gridHeight - 1                       ) {let h = Number(terrainGrid[x    ][y + 1]); if (h > highestH) {highestH = h;}} // bottom-middle.
-   if (y < g.gridHeight - 1 && x < g.gridWidth - 1) {let h = Number(terrainGrid[x + 1][y + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
+   if (r < g.gridHeight - 1 && c > 0              ) {let h = Number(terrainGrid[r + 1][c - 1]); if (h > highestH) {highestH = h;}} // bottom-left.
+   if (r < g.gridHeight - 1                       ) {let h = Number(terrainGrid[r + 1][c    ]); if (h > highestH) {highestH = h;}} // bottom-middle.
+   if (r < g.gridHeight - 1 && c < g.gridWidth - 1) {let h = Number(terrainGrid[r + 1][c + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
 
    return highestH;
 }
 
-function terrainSquareHasNonNullNeighbour(x, y)
+function terrainSquareHasNonNullNeighbour(r, c)
 {
    let highestH = 0;
    let g        = gameState;
 
-   if (y > 0                && x > 0              ) {if (terrainGrid[x - 1][y - 1] !== null) {return true;}} // top-left.
-   if (y > 0                                      ) {if (terrainGrid[x    ][y - 1] !== null) {return true;}} // top-middle.
-   if (y > 0                && x < g.gridWidth - 1) {if (terrainGrid[x + 1][y - 1] !== null) {return true;}} // top-right.
+   if (r > 0                && c > 0              ) {if (terrainGrid[r - 1][c - 1] !== null) {return true;}} // top-left.
+   if (r > 0                                      ) {if (terrainGrid[r - 1][c    ] !== null) {return true;}} // top-middle.
+   if (r > 0                && c < g.gridWidth - 1) {if (terrainGrid[r - 1][c + 1] !== null) {return true;}} // top-right.
 
-   if (                        x > 0              ) {if (terrainGrid[x - 1][y    ] !== null) {return true;}} // left.
-   if (                        x < g.gridWidth - 1) {if (terrainGrid[x + 1][y    ] !== null) {return true;}} // right.
+   if (                        c > 0              ) {if (terrainGrid[r    ][c - 1] !== null) {return true;}} // left.
+   if (                        c < g.gridWidth - 1) {if (terrainGrid[r    ][c + 1] !== null) {return true;}} // right.
 
-   if (y < g.gridHeight - 1 && x > 0              ) {if (terrainGrid[x - 1][y + 1] !== null) {return true;}} // bottom-left.
-   if (y < g.gridHeight - 1                       ) {if (terrainGrid[x    ][y + 1] !== null) {return true;}} // bottom-middle.
-   if (y < g.gridHeight - 1 && x < g.gridWidth - 1) {if (terrainGrid[x + 1][y + 1] !== null) {return true;}} // bottom-right.
+   if (r < g.gridHeight - 1 && c > 0              ) {if (terrainGrid[r + 1][c - 1] !== null) {return true;}} // bottom-left.
+   if (r < g.gridHeight - 1                       ) {if (terrainGrid[r + 1][c    ] !== null) {return true;}} // bottom-middle.
+   if (r < g.gridHeight - 1 && c < g.gridWidth - 1) {if (terrainGrid[r + 1][c + 1] !== null) {return true;}} // bottom-right.
 
    return false;
 }
@@ -808,11 +812,11 @@ function updateScoreAndShowEndOfRoundSummary()
 {
    let nHomesTotal = 0;
 
-   for (let x = 0; x < gameState.gridWidth; ++x)
+   for (let r = 0; r < gameState.gridHeight; ++r)
    {
-      for (let y = 0; y < gameState.gridHeight; ++y)
+      for (let c = 0; c < gameState.gridWidth; ++c)
       {
-         if (gameGrid[x][y].hasHouse)
+         if (gameGrid[r][c].hasHouse)
          {
             ++nHomesTotal;
          }
@@ -841,11 +845,11 @@ function getPercentageOfGridUnderwater()
 {
    let nSquaresUnderwater = 0;
 
-   for (let x = 0; x < gameState.gridWidth; ++x)
+   for (let r = 0; r < gameState.gridHeight; ++r)
    {
-      for (let y = 0; y < gameState.gridHeight; ++y)
+      for (let c = 0; c < gameState.gridWidth; ++c)
       {
-         if (gameGrid[x][y].isUnderwater)
+         if (gameGrid[r][c].isUnderwater)
          {
             ++nSquaresUnderwater;
          }
@@ -872,13 +876,13 @@ function copyArray(terrainGrid)
 {
    let newTerrainGrid = [];
 
-   for (let x = 0; x < terrainGrid.length; ++x)
+   for (let r = 0; r < terrainGrid.length; ++r)
    {
-      newTerrainGrid[x] = [];
+      newTerrainGrid[r] = [];
 
-      for (let y = 0; y < terrainGrid[x].length; ++y)
+      for (let c = 0; c < terrainGrid[r].length; ++c)
       {
-         newTerrainGrid[x][y] = terrainGrid[x][y];
+         newTerrainGrid[r][c] = terrainGrid[r][c];
       }
    }
 
@@ -888,11 +892,11 @@ function copyArray(terrainGrid)
 /*
  * Draw the supplied text at the supplied position.
  */
-function printTextOnCanvas(x, y, text)
+function printTextOnCanvas(r, c, text)
 {
    ctx.fillStyle = 'rgb(0, 0, 200)';
    ctx.font      = 'bold 16px Arial';
-   ctx.fillText(text, x + 10, y + 22);
+   ctx.fillText(text, c + 10, r + 22);
 }
 
 /*
@@ -903,6 +907,6 @@ function getRandomInt(low, high)
    return low + Math.floor(Math.random() * (high - low))
 }
 
-function drawSpriteOnGridSquare(x, y, image) {ctx.drawImage(image, x * SPRITE_WIDTH, y * SPRITE_HEIGHT)   ;}
-function drawTextOnGridSquare(x, y, text)    {printTextOnCanvas(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, text);}
+function drawSpriteOnGridSquare(r, c, image) {ctx.drawImage(image, c * SPRITE_WIDTH, r * SPRITE_HEIGHT)   ;}
+function drawTextOnGridSquare(r, c, text)    {printTextOnCanvas(c * SPRITE_WIDTH, r * SPRITE_HEIGHT, text);}
 
