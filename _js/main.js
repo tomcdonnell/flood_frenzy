@@ -450,8 +450,8 @@ function onClickRecedeFlood()
    decreaseWaterLevelEverywhereByOne();
 }
 
-function onMouseUpCanvas(e)   {gameState.isBuildingWalls = false;}
 function onMouseDownCanvas(e) {gameState.isBuildingWalls = true ;}
+function onMouseUpCanvas(e)   {gameState.isBuildingWalls = false;}
 
 function onMouseMoveCanvas(e)
 {
