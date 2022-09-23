@@ -16,19 +16,18 @@ let gameGrid                  = [];
 let terrainGrid               = [];
 let gameState                 =
 {
-   boolUseDiagonalPaths: true  ,
-   floodIsReceding     : false ,
-   gameMode            : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
-   gridHeight          : null  ,
-   gridNumbersAreShown : false ,
-   gridWidth           : null  ,
-   isBuildingWalls     : false ,
-   nHomesLost          : 0     ,
-   nWaterPathsByKey    : {}    , // Keys are in format 'r,c->r,c'.
-   playerScore         : 0     ,
-   roundNo             : 1     ,
-   totalHousesLost     : 0     ,
-   totalHousesSaved    : 0
+   floodIsReceding    : false ,
+   gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
+   gridHeight         : null  ,
+   gridNumbersAreShown: false ,
+   gridWidth          : null  ,
+   isBuildingWalls    : false ,
+   nHomesLost         : 0     ,
+   nWaterPathsByKey   : {}    , // Keys are in format 'r,c->r,c'.
+   playerScore        : 0     ,
+   roundNo            : 1     ,
+   totalHousesLost    : 0     ,
+   totalHousesSaved   : 0
 };
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -738,7 +737,7 @@ function getNeighbourCoords(r, c)
 {
    let returnArray =
    (
-      (gameState.boolUseDiagonalPaths)?
+      ($('input#use-diagonal-paths-checkbox').prop('checked'))?
       [
          {r: r - 1, c: c - 1}, // TL.
          {r: r - 1, c: c    }, // TM.
@@ -762,7 +761,7 @@ function getNeighbourCoords(r, c)
 
 function getAvgHeightOfSurroundingSquares(r, c)
 {
-   let b   = gameState.boolUseDiagonalPaths;
+   let b   = $('input#use-diagonal-paths-checkbox').prop('checked');
    let h   = gameState.gridHeight;
    let n   = 0;
    let sum = 0;
@@ -784,7 +783,7 @@ function getAvgHeightOfSurroundingSquares(r, c)
 
 function getHeightOfHighestNeighbour(r, c)
 {
-   let b        = gameState.boolUseDiagonalPaths;
+   let b        = $('input#use-diagonal-paths-checkbox').prop('checked');
    let h        = gameState.gridHeight;
    let highestH = 0;
    let w        = gameState.gridWidth;

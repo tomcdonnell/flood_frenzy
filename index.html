@@ -42,7 +42,7 @@ div.buttons-div > span
    background-color: #ccf;
    border: 1px solid black;
    display: inline-block;
-   height: 110px;
+   min-height: 140px;
    padding: 8px;
 }
 
@@ -262,6 +262,14 @@ table.high-scores-table td
       </tr>
        <td><button onclick='onClickToggleHeightNumbers()'>Toggle<br/>numbers</button></td>
        <td><button onclick='onClickRecedeFlood()'>Recede<br/>flood</button></td>
+      </tr>
+      <tr>
+       <td colspan='2'>
+        <label for='use-diagonal-paths-checkbox'>
+         <input type='checkbox' id='use-diagonal-paths-checkbox' checked='checked'/>
+         Use diagonal paths
+        </label>
+       </td>
       </tr>
      </tbody>
     </table>
