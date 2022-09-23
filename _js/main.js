@@ -429,6 +429,7 @@ function onClickRainOnRandomSquare()
 
 function onClickRainOnAllSquares()
 {
+   drawGameGrid(false); // Redraw game grid in case streams/rivers are already shown.
    gameState.nWaterPathsByKey = {};
 
    for (let x = 0; x < gameState.gridWidth; ++x)
