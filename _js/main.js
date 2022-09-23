@@ -660,13 +660,20 @@ function findLocalLowestGridCoordsRecursively(r, c)
       {
          ctx.lineTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
 
-         // Remember that water has found a path from the higher square to the lower square.
-         let key = r + ',' + c + '->' + lowerGridSquare.r + ',' + lowerGridSquare.c;
-         if (gameState.nWaterPathsByKey[key] === undefined) {gameState.nWaterPathsByKey[key] = 0;}
-         ++gameState.nWaterPathsByKey[key];
+         if ($('input#use-thicker-lines-for-bigger-rivers-checkbox').prop('checked'))
+         {
+            // Remember that water has found a path from the higher square to the lower square.
+            let key = r + ',' + c + '->' + lowerGridSquare.r + ',' + lowerGridSquare.c;
+            if (gameState.nWaterPathsByKey[key] === undefined) {gameState.nWaterPathsByKey[key] = 0;}
+            ++gameState.nWaterPathsByKey[key];
 
-         ctx.lineCap   = 'round';
-         ctx.lineWidth = gameState.nWaterPathsByKey[key] / 2;
+            ctx.lineCap   = 'round';
+            ctx.lineWidth = gameState.nWaterPathsByKey[key] / 2;
+         }
+         else
+         {
+            ctx.lineWidth = 2;
+         }
       }
       else
       {
