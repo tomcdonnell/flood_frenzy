@@ -16,18 +16,19 @@ let gameGrid                  = [];
 let terrainGrid               = [];
 let gameState                 =
 {
-   floodIsReceding    : false ,
-   gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
-   gridHeight         : null  ,
-   gridNumbersAreShown: false ,
-   gridWidth          : null  ,
-   isBuildingWalls    : false ,
-   nHomesLost         : 0     ,
-   nWaterPathsByKey   : {}    , // Keys are in format 'r,c->r,c'.
-   playerScore        : 0     ,
-   roundNo            : 1     ,
-   totalHousesLost    : 0     ,
-   totalHousesSaved   : 0
+   boolUseDiagonalPaths: true  ,
+   floodIsReceding     : false ,
+   gameMode            : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
+   gridHeight          : null  ,
+   gridNumbersAreShown : false ,
+   gridWidth           : null  ,
+   isBuildingWalls     : false ,
+   nHomesLost          : 0     ,
+   nWaterPathsByKey    : {}    , // Keys are in format 'r,c->r,c'.
+   playerScore         : 0     ,
+   roundNo             : 1     ,
+   totalHousesLost     : 0     ,
+   totalHousesSaved    : 0
 };
 
 // Startup code. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -607,20 +608,9 @@ function findLocalLowestGridCoordsRecursively(r, c)
    // Collect all the results so we can filter and sort them.
    let currentSquareHeight = gameGrid[r][c];
    let allResultCoords     = [];
-   let neighbourCoords     =
-   [
-      {r: r - 1, c: c - 1}, // TL.
-      {r: r - 1, c: c    }, // TM.
-      {r: r - 1, c: c + 1}, // TR.
-      {r: r    , c: c - 1}, // ML.
-      {r: r    , c: c + 1}, // MR.
-      {r: r + 1, c: c - 1}, // BL.
-      {r: r + 1, c: c    }, // BM.
-      {r: r + 1, c: c + 1}  // BR.
-   ];
 
    // For each neighbouring square...
-   for (let coord of neighbourCoords)
+   for (let coord of getNeighbourCoords(r, c))
    {
       if
       (
@@ -707,19 +697,8 @@ function addWaterUpToWaterLevelRecursively(r, c, targetWaterLevel)
 
    let currentSquareHeight = gameGrid[r][c];
    let allResultCoords     = [];
-   let neighbourCoords     =
-   [
-      {r: r - 1, c: c - 1}, // TL.
-      {r: r - 1, c: c    }, // TM.
-      {r: r - 1, c: c + 1}, // TR.
-      {r: r    , c: c - 1}, // ML.
-      {r: r    , c: c + 1}, // MR.
-      {r: r + 1, c: c - 1}, // BL.
-      {r: r + 1, c: c    }, // BM.
-      {r: r + 1, c: c + 1}  // BR.
-   ];
 
-   for (let coord of neighbourCoords)
+   for (let coord of getNeighbourCoords(r, c))
    {
       if
       (
@@ -755,11 +734,38 @@ function addWaterUpToWaterLevelRecursively(r, c, targetWaterLevel)
 
 // Utility functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function getNeighbourCoords(r, c)
+{
+   let returnArray =
+   (
+      (gameState.boolUseDiagonalPaths)?
+      [
+         {r: r - 1, c: c - 1}, // TL.
+         {r: r - 1, c: c    }, // TM.
+         {r: r - 1, c: c + 1}, // TR.
+         {r: r    , c: c - 1}, // ML.
+         {r: r    , c: c + 1}, // MR.
+         {r: r + 1, c: c - 1}, // BL.
+         {r: r + 1, c: c    }, // BM.
+         {r: r + 1, c: c + 1}  // BR.
+      ]:
+      [
+         {r: r - 1, c: c    }, // TM.
+         {r: r    , c: c - 1}, // ML.
+         {r: r    , c: c + 1}, // MR.
+         {r: r + 1, c: c    }  // BM.
+      ]
+   );
+
+   return returnArray;
+}
+
 function getAvgHeightOfSurroundingSquares(r, c)
 {
+   let b   = gameState.boolUseDiagonalPaths;
+   let h   = gameState.gridHeight;
    let n   = 0;
    let sum = 0;
-   let h   = gameState.gridHeight;
    let w   = gameState.gridWidth;
 
    if (r > 0     && c > 0    ) {sum += Number(terrainGrid[r - 1][c - 1]); ++n;} // top-left.
@@ -778,39 +784,41 @@ function getAvgHeightOfSurroundingSquares(r, c)
 
 function getHeightOfHighestNeighbour(r, c)
 {
-   let highestH = 0;
+   let b        = gameState.boolUseDiagonalPaths;
    let h        = gameState.gridHeight;
+   let highestH = 0;
    let w        = gameState.gridWidth;
 
-   if (r > 0     && c > 0    ) {let h = Number(terrainGrid[r - 1][c - 1]); if (h > highestH) {highestH = h;}} // top-left.
-   if (r > 0                 ) {let h = Number(terrainGrid[r - 1][c    ]); if (h > highestH) {highestH = h;}} // top-middle.
-   if (r > 0     && c < w - 1) {let h = Number(terrainGrid[r - 1][c + 1]); if (h > highestH) {highestH = h;}} // top-right.
+   if (b && r > 0     && c > 0    ) {let h = Number(terrainGrid[r - 1][c - 1]); if (h > highestH) {highestH = h;}} // top-left.
+   if (     r > 0                 ) {let h = Number(terrainGrid[r - 1][c    ]); if (h > highestH) {highestH = h;}} // top-middle.
+   if (b && r > 0     && c < w - 1) {let h = Number(terrainGrid[r - 1][c + 1]); if (h > highestH) {highestH = h;}} // top-right.
 
-   if (             c > 0    ) {let h = Number(terrainGrid[r    ][c - 1]); if (h > highestH) {highestH = h;}} // left.
-   if (             c < w - 1) {let h = Number(terrainGrid[r    ][c + 1]); if (h > highestH) {highestH = h;}} // right.
+   if (                  c > 0    ) {let h = Number(terrainGrid[r    ][c - 1]); if (h > highestH) {highestH = h;}} // left.
+   if (                  c < w - 1) {let h = Number(terrainGrid[r    ][c + 1]); if (h > highestH) {highestH = h;}} // right.
 
-   if (r < h - 1 && c > 0    ) {let h = Number(terrainGrid[r + 1][c - 1]); if (h > highestH) {highestH = h;}} // bottom-left.
-   if (r < h - 1             ) {let h = Number(terrainGrid[r + 1][c    ]); if (h > highestH) {highestH = h;}} // bottom-middle.
-   if (r < h - 1 && c < w - 1) {let h = Number(terrainGrid[r + 1][c + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
+   if (b && r < h - 1 && c > 0    ) {let h = Number(terrainGrid[r + 1][c - 1]); if (h > highestH) {highestH = h;}} // bottom-left.
+   if (     r < h - 1             ) {let h = Number(terrainGrid[r + 1][c    ]); if (h > highestH) {highestH = h;}} // bottom-middle.
+   if (b && r < h - 1 && c < w - 1) {let h = Number(terrainGrid[r + 1][c + 1]); if (h > highestH) {highestH = h;}} // bottom-right.
 
    return highestH;
 }
 
 function terrainSquareHasNonNullNeighbour(r, c)
 {
+   let b = gameState.boolUseDiagonalPaths;
    let h = gameState.gridHeight;
    let w = gameState.gridWidth;
 
-   if (r > 0     && c > 0    ) {if (terrainGrid[r - 1][c - 1] !== null) {return true;}} // top-left.
-   if (r > 0                 ) {if (terrainGrid[r - 1][c    ] !== null) {return true;}} // top-middle.
-   if (r > 0     && c < w - 1) {if (terrainGrid[r - 1][c + 1] !== null) {return true;}} // top-right.
+   if (b && r > 0     && c > 0    ) {if (terrainGrid[r - 1][c - 1] !== null) {return true;}} // top-left.
+   if (     r > 0                 ) {if (terrainGrid[r - 1][c    ] !== null) {return true;}} // top-middle.
+   if (b && r > 0     && c < w - 1) {if (terrainGrid[r - 1][c + 1] !== null) {return true;}} // top-right.
 
-   if (             c > 0    ) {if (terrainGrid[r    ][c - 1] !== null) {return true;}} // left.
-   if (             c < w - 1) {if (terrainGrid[r    ][c + 1] !== null) {return true;}} // right.
+   if (                  c > 0    ) {if (terrainGrid[r    ][c - 1] !== null) {return true;}} // left.
+   if (                  c < w - 1) {if (terrainGrid[r    ][c + 1] !== null) {return true;}} // right.
 
-   if (r < h - 1 && c > 0    ) {if (terrainGrid[r + 1][c - 1] !== null) {return true;}} // bottom-left.
-   if (r < h - 1             ) {if (terrainGrid[r + 1][c    ] !== null) {return true;}} // bottom-middle.
-   if (r < h - 1 && c < w - 1) {if (terrainGrid[r + 1][c + 1] !== null) {return true;}} // bottom-right.
+   if (b && r < h - 1 && c > 0    ) {if (terrainGrid[r + 1][c - 1] !== null) {return true;}} // bottom-left.
+   if (     r < h - 1             ) {if (terrainGrid[r + 1][c    ] !== null) {return true;}} // bottom-middle.
+   if (b && r < h - 1 && c < w - 1) {if (terrainGrid[r + 1][c + 1] !== null) {return true;}} // bottom-right.
 
    return false;
 }
