@@ -14,7 +14,6 @@ let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visi
 let globalImages              = [];
 let gameGrid                  = [];
 let terrainGrid               = [];
-//let nWaterPathsByKey          = {}; // Keys are in format 'x,y->x,y' TODO: Record this info as rain falls so stream with can be proportional to nWaterPaths for an
 let gameState                 =
 {
    floodIsReceding    : false ,
@@ -24,6 +23,7 @@ let gameState                 =
    gridWidth          : null  ,
    isBuildingWalls    : false ,
    nHomesLost         : 0     ,
+   nWaterPathsByKey   : {}    , // Keys are in format 'r,c->r,c'.
    playerScore        : 0     ,
    roundNo            : 1     ,
    totalHousesLost    : 0     ,
@@ -411,6 +411,8 @@ function onClickRainOnRandomSquare()
    let rainC         = null;
    let squareIsValid = false;
 
+   gameState.nWaterPathsByKey = {};
+
    while (!squareIsValid)
    {
       rainR = getRandomInt(0, gameState.gridHeight);
@@ -422,12 +424,13 @@ function onClickRainOnRandomSquare()
       }
    }
 
-   drawTextOnGridSquare(rainR, rainC, 'R');
    rainUntilWaterLevelRisesByOne(rainR, rainC, true);
 }
 
 function onClickRainOnAllSquares()
 {
+   gameState.nWaterPathsByKey = {};
+
    for (let x = 0; x < gameState.gridWidth; ++x)
    {
       for (let y = 0; y < gameState.gridHeight; ++y)
@@ -486,6 +489,8 @@ function onClickCanvas(e)
       return;
    }
 
+   gameState.nWaterPathsByKey = {};
+
    let canvasJq     = $('canvas');
    let canvasOffset = canvasJq.offset();
    let mouseX       = e.pageX - canvasOffset.left;
@@ -493,7 +498,6 @@ function onClickCanvas(e)
    let mouseGridR   = Math.floor(mouseY / SPRITE_HEIGHT);
    let mouseGridC   = Math.floor(mouseX / SPRITE_WIDTH );
 
-   drawTextOnGridSquare(mouseGridR, mouseGridC, 'R');
    rainUntilWaterLevelRisesByOne(mouseGridR, mouseGridC, true);
 }
 
@@ -587,11 +591,6 @@ function rainUntilWaterLevelRisesByOne(rainR, rainC, boolIncreaseFloodLevel)
       localPoolBottomCoords = {r: rainR, c: rainC};
    }
 
-   if (gameState.gridNumbersAreShown)
-   {
-      drawTextOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, 'M'); // Mark local minima.
-   }
-
    if (boolIncreaseFloodLevel)
    {
       let targetWaterLevel = gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].height + 1;
@@ -663,21 +662,26 @@ function findLocalLowestGridCoordsRecursively(r, c)
       let halfSpriteHeight = SPRITE_HEIGHT / 2;
       let halfSpriteWidth  = SPRITE_WIDTH  / 2;
       // Draw line from current grid square to new grid square.
-      ctx.strokeStyle = 'rgb(0, 0, 200)'; // Set draw colour to red.
+      ctx.strokeStyle = 'rgb(60, 60, 200)'; // Set draw colour to blue.
       ctx.beginPath();                    // Start a path that will later be drawn.
       ctx.moveTo(c * SPRITE_WIDTH + halfSpriteWidth, r * SPRITE_HEIGHT + halfSpriteHeight);
 
       if (gameGrid[r][c].height > 0)
       {
          ctx.lineTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
+
+         // Remember that water has found a path from the higher square to the lower square.
+         let key = r + ',' + c + '->' + lowerGridSquare.r + ',' + lowerGridSquare.c;
+         if (gameState.nWaterPathsByKey[key] === undefined) {gameState.nWaterPathsByKey[key] = 0;}
+         ++gameState.nWaterPathsByKey[key];
+
+         ctx.lineCap   = 'round';
+         ctx.lineWidth = gameState.nWaterPathsByKey[key] / 2;
       }
       else
       {
          ctx.moveTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
       }
-
-      // Set line width.
-      ctx.lineWidth = 3;
 
       ctx.stroke();
    }
@@ -890,16 +894,6 @@ function copyArray(terrainGrid)
 }
 
 /*
- * Draw the supplied text at the supplied position.
- */
-function printTextOnCanvas(r, c, text)
-{
-   ctx.fillStyle = 'rgb(0, 0, 200)';
-   ctx.font      = 'bold 16px Arial';
-   ctx.fillText(text, c + 10, r + 22);
-}
-
-/*
  * Get a random number in range [low, high).
  */
 function getRandomInt(low, high)
@@ -907,6 +901,15 @@ function getRandomInt(low, high)
    return low + Math.floor(Math.random() * (high - low))
 }
 
-function drawSpriteOnGridSquare(r, c, image) {ctx.drawImage(image, c * SPRITE_WIDTH, r * SPRITE_HEIGHT)   ;}
-function drawTextOnGridSquare(r, c, text)    {printTextOnCanvas(c * SPRITE_WIDTH, r * SPRITE_HEIGHT, text);}
+function drawSpriteOnGridSquare(r, c, image)
+{
+   ctx.drawImage(image, c * SPRITE_WIDTH, r * SPRITE_HEIGHT);
+}
+
+function drawTextOnGridSquare(r, c, text)
+{
+   ctx.fillStyle = 'rgb(0, 0, 200)';
+   ctx.font      = 'bold 16px Arial';
+   ctx.fillText(text, c * SPRITE_WIDTH + 10, r * SPRITE_HEIGHT + 22);
+}
 
