@@ -392,8 +392,12 @@ function onClickStartRound()
 function onClickGenerateNewTerrain()
 {
    initialiseGameGrid();
+   drawGameGrid(gameState.gridNumbersAreShown);
+}
 
-   drawGameGrid(gameState.gridNumbersAreShown); // Initially draw the grid without the numbers.
+function onClickRedrawCurrentTerrain()
+{
+   drawGameGrid(gameState.gridNumbersAreShown);
 }
 
 function onClickToggleHeightNumbers()

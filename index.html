@@ -42,7 +42,7 @@ div.buttons-div > span
    background-color: #ccf;
    border: 1px solid black;
    display: inline-block;
-   min-height: 140px;
+   min-height: 160px;
    padding: 8px;
 }
 
@@ -206,7 +206,11 @@ table.high-scores-table td
         </select>
        </td>
        <td rowspan=4'>
-        <button onclick='onClickGenerateNewTerrain()'>Generate<br/>new terrain</button>
+        <button onclick='onClickGenerateNewTerrain()' title='This will clear the current terrain and replace with a completely new terrain.'>
+         Generate<br/>new terrain
+        </button>
+        <br/>
+        <button onclick='onClickRedrawCurrentTerrain()' title='This will clear rivers from the current terrain.'>Redraw<br/>current terrain</button>
        </td>
       </tr>
       <tr>
