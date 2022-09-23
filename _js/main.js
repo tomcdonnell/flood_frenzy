@@ -762,16 +762,16 @@ function getAvgHeightOfSurroundingSquares(r, c)
    let h   = gameState.gridHeight;
    let w   = gameState.gridWidth;
 
-   if (r > 0                        && c > 0                      ) {sum += Number(terrainGrid[r - 1][c - 1]); ++n;} // top-left.
-   if (r > 0                                                      ) {sum += Number(terrainGrid[r - 1][c    ]); ++n;} // top-middle.
-   if (r > 0                        && c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r - 1][c + 1]); ++n;} // top-right.
+   if (r > 0     && c > 0    ) {sum += Number(terrainGrid[r - 1][c - 1]); ++n;} // top-left.
+   if (r > 0                 ) {sum += Number(terrainGrid[r - 1][c    ]); ++n;} // top-middle.
+   if (r > 0     && c < w - 1) {sum += Number(terrainGrid[r - 1][c + 1]); ++n;} // top-right.
 
-   if (                                c > 0                      ) {sum += Number(terrainGrid[r    ][c - 1]); ++n;} // left.
-   if (                                c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r    ][c + 1]); ++n;} // right.
+   if (             c > 0    ) {sum += Number(terrainGrid[r    ][c - 1]); ++n;} // left.
+   if (             c < w - 1) {sum += Number(terrainGrid[r    ][c + 1]); ++n;} // right.
 
-   if (r < gameState.gridHeight - 1 && c > 0                      ) {sum += Number(terrainGrid[r + 1][c - 1]); ++n;} // bottom-left.
-   if (r < gameState.gridHeight - 1                               ) {sum += Number(terrainGrid[r + 1][c    ]); ++n;} // bottom-middle.
-   if (r < gameState.gridHeight - 1 && c < gameState.gridWidth - 1) {sum += Number(terrainGrid[r + 1][c + 1]); ++n;} // bottom-right.
+   if (r < h - 1 && c > 0    ) {sum += Number(terrainGrid[r + 1][c - 1]); ++n;} // bottom-left.
+   if (r < h - 1             ) {sum += Number(terrainGrid[r + 1][c    ]); ++n;} // bottom-middle.
+   if (r < h - 1 && c < w - 1) {sum += Number(terrainGrid[r + 1][c + 1]); ++n;} // bottom-right.
 
    return ((n > 0)? Math.floor(sum / n): 0);
 }
