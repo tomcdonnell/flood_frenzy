@@ -106,9 +106,8 @@ function main(images)
       $('div.color-key-div').append("<span><span class='height-number-span'>" + i + "</span><img src='" + imageFilenames[i] + "'/></span>");
    }
 
-   $('canvas').click(onClickCanvas);
-   $('canvas').mousedown(onMouseDownCanvas).mouseup(onMouseUpCanvas).mousemove(onMouseMoveCanvas);
-   $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);
+   $('canvas').mousedown(onMouseDownCanvas).mousemove(onMouseMoveCanvas).click(onClickCanvas); // NOTE: The 'click' event fires after mouseup event,
+   $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);                                   //       so here is used as 'click' and 'mouseup'.
 
    onClickGameModeButton();
 }
@@ -450,8 +449,10 @@ function onClickRecedeFlood()
    decreaseWaterLevelEverywhereByOne();
 }
 
-function onMouseDownCanvas(e) {gameState.isBuildingWalls = true ;}
-function onMouseUpCanvas(e)   {gameState.isBuildingWalls = false;}
+function onMouseDownCanvas(e)
+{
+   gameState.isBuildingWalls = true;
+}
 
 function onMouseMoveCanvas(e)
 {
@@ -491,6 +492,13 @@ function onClickCanvas(e)
 {
    if (gameState.gameMode != 'simulation')
    {
+      return;
+   }
+
+   if (gameState.isBuildingWalls)
+   {
+      // This is the 'mouseup' part of the function.
+      gameState.isBuildingWalls = false;
       return;
    }
 
