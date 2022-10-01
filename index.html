@@ -34,7 +34,7 @@ div.buttons-div.simulation button
    padding: 5px;
    margin-bottom: 5px;
    margin-right: 5px;
-   width: 120px;
+   width: 95px;
 }
 
 div.buttons-div > span
@@ -42,13 +42,13 @@ div.buttons-div > span
    background-color: #ccf;
    border: 1px solid black;
    display: inline-block;
-   min-height: 170px;
+   min-height: 210px;
    padding: 8px;
 }
 
-div.buttons-div > span:nth-child(1) {width: 35%;}
+div.buttons-div > span:nth-child(1) {width: 25%;}
 div.buttons-div > span:nth-child(2) {width: 25%;}
-div.buttons-div > span:nth-child(3) {width: 33%;}
+div.buttons-div > span:nth-child(3) {width: 43%;}
 
 div.color-key-div img
 {
@@ -215,10 +215,12 @@ table.high-scores-table td
        </td>
        <td rowspan=4'>
         <button onclick='onClickGenerateNewTerrain()' title='This will clear the current terrain and replace with a completely new terrain.'>
-         Generate<br/>new terrain
+         Generate<br/>new<br/>terrain
         </button>
         <br/>
-        <button onclick='onClickRedrawCurrentTerrain()' title='This will clear rivers from the current terrain.'>Redraw<br/>current terrain</button>
+        <button onclick='onClickRedrawCurrentTerrain()' title='This will clear rivers from the current terrain.'>
+         Redraw<br/>current<br/>terrain
+        </button>
        </td>
       </tr>
       <tr>
@@ -269,8 +271,8 @@ table.high-scores-table td
     <table>
      <tbody>
       <tr>
-       <td><button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random square</button></td>
-       <td><button onclick='onClickRainOnAllSquares()'>Rain on<br/>all squares</button></td>
+       <td><button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random<br/>square</button></td>
+       <td><button onclick='onClickRainOnAllSquares()'>Rain on<br/>all<br/>squares</button></td>
       </tr>
        <td><button onclick='onClickToggleHeightNumbers()'>Toggle<br/>numbers</button></td>
        <td><button onclick='onClickRecedeFlood()'>Recede<br/>flood</button></td>
@@ -303,7 +305,8 @@ table.high-scores-table td
        <td>
         Click and drag on the map to build walls.<br/><br/>
         Click 'Rain on all squares' to show where rivers will form.<br/><br/>
-        Click on one of the color key squares to repeatedly rain on squares of that color until no such squares are above water.
+        Block a river with a wall, then 'Rain on all squares' again to see how the river will re-route.<br/><br/>
+        Click on one of the color key squares to rain on a random square of that color.
        </td>
       </tr>
      </tbody>
