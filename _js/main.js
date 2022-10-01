@@ -103,7 +103,13 @@ function main(images)
    // Add images to color-key.
    for (let i = 0; i < 20; ++i)
    {
-      $('div.color-key-div').append("<span><span class='height-number-span'>" + i + "</span><img src='" + imageFilenames[i] + "'/></span>");
+      $('div.color-key-div').append
+      (
+         "<span onclick='rainRepeatedlyOnSquaresOfHeight(" + i + ")'>" +
+          "<img src='" + imageFilenames[i] + "'/><br/>" +
+          "<span class='height-number-span'>" + i + '</span>' +
+         '</span>'
+      );
    }
 
    $('canvas').mousedown(onMouseDownCanvas).mousemove(onMouseMoveCanvas).click(onClickCanvas); // NOTE: The 'click' event fires after mouseup event,
@@ -142,6 +148,7 @@ function initialiseGameGrid()
 
          gameGrid[r][c] =
          {
+            // These key:value pairs define the state of a gameGrid square.
             hasHouse    : false           ,
             height      : gridSquareHeight,
             heightOrig  : gridSquareHeight, // Used when the flood recedes.
@@ -564,7 +571,6 @@ function rainOnRandomSquarePeriodicallyUntilLimitThenRecede()
 
 function decreaseWaterLevelEverywhereByOne()
 {
-   // Decrease water level everyone by one.
    for (let r = 0; r < gameState.gridHeight; ++r)
    {
       for (let c = 0; c < gameState.gridWidth; ++c)
@@ -590,6 +596,40 @@ function decreaseWaterLevelEverywhereByOne()
             }
          }
       }
+   }
+}
+
+function rainRepeatedlyOnSquaresOfHeight(targetHeight)
+{
+   if (gameState.gameMode != 'simulation')
+   {
+      return;
+   }
+
+   while (true)
+   {
+      let targetCoords = [];
+
+      for (let r = 0; r < gameState.gridHeight; ++r)
+      {
+         for (let c = 0; c < gameState.gridWidth; ++c)
+         {
+            if (gameGrid[r][c].height === targetHeight && !gameGrid[r][c].isUnderwater)
+            {
+               targetCoords.push({r: r, c: c});
+            }
+         }
+      }
+
+      if (targetCoords.length == 0)
+      {
+         break;
+      }
+
+      let indexToRainOn = getRandomInt(0, targetCoords.length);
+      let coord         = targetCoords[indexToRainOn];
+
+      rainUntilWaterLevelRisesByOne(coord.r, coord.c, true);
    }
 }
 

@@ -55,13 +55,21 @@ div.color-key-div img
    border: 1px solid rgb(0, 0, 200);
 }
 
-div.color-key-div span.height-number-span
+div.color-key-div > span
 {
+   cursor: pointer;
+   display: inline-block;
+   margin-left: 17px;
+}
+
+div.color-key-div > span > span.height-number-span
+{
+   bottom: 10px;
    color: rgb(0, 0, 200);
    font-weight: bold;
+   left: 5px;
    position: relative;
-   left: 26px;
-   bottom: 10px;
+   top: -30px;
 }
 
 div.game-mode-div
@@ -295,7 +303,7 @@ table.high-scores-table td
        <td>
         Click and drag on the map to build walls.<br/><br/>
         Click 'Rain on all squares' to show where rivers will form.<br/><br/>
-        Block a river with a wall, then 'Rain on all squares' again to see how the river will re-route.
+        Click on one of the color key squares to repeatedly rain on squares of that color until no such squares are above water.
        </td>
       </tr>
      </tbody>
