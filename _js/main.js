@@ -2,6 +2,14 @@
  * vim: ts=3 sw=3 et wrap co=150 go-=b
  */
 
+// TODO: Implement 'send rain from random direction' button.
+//        * Rain cloud is a circular area of diameter approx. half the grid width.
+//        * Rain cloud moves slowing on to game grid from random direction.
+//        * Rain falls on all game grid squares that are covered by rain cloud.
+//        * Rain cloud moves in constant direction once per second.
+//        * Rivers formation is visible as rain falls from cloud.
+//        * In game mode, tell player the direction from which rain is coming so he/she can build walls in preparation for flooding.
+
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const MAX_TERRAIN_HEIGHT = 20;
