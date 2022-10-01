@@ -112,8 +112,8 @@ function main(images)
       );
    }
 
-   $('canvas').mousedown(onMouseDownCanvas).mousemove(onMouseMoveCanvas).click(onClickCanvas); // NOTE: The 'click' event fires after mouseup event,
-   $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);                                   //       so here is used as 'click' and 'mouseup'.
+   $('canvas').mousedown(onMouseDownCanvas).mousemove(onMouseMoveCanvas).mouseup(onMouseUpCanvas).click(onClickCanvas);
+   $('span.n-rounds-per-game-span').html(N_ROUNDS_PER_GAME);
 
    onClickGameModeButton();
 }
@@ -456,10 +456,8 @@ function onClickRecedeFlood()
    decreaseWaterLevelEverywhereByOne();
 }
 
-function onMouseDownCanvas(e)
-{
-   gameState.isBuildingWalls = true;
-}
+function onMouseDownCanvas(e) {if ($('select[name=mouseOnCanvasMode]').val() === 'clickAndDragToBuildWalls') {gameState.isBuildingWalls = true ;}}
+function onMouseUpCanvas(e)   {if ($('select[name=mouseOnCanvasMode]').val() === 'clickAndDragToBuildWalls') {gameState.isBuildingWalls = false;}}
 
 function onMouseMoveCanvas(e)
 {
@@ -497,15 +495,8 @@ function onMouseMoveCanvas(e)
 
 function onClickCanvas(e)
 {
-   if (gameState.gameMode != 'simulation')
+   if (gameState.gameMode != 'simulation' || $('select[name=mouseOnCanvasMode]').val() !== 'clickToRainOnSquare')
    {
-      return;
-   }
-
-   if (gameState.isBuildingWalls)
-   {
-      // This is the 'mouseup' part of the function.
-      gameState.isBuildingWalls = false;
       return;
    }
 
