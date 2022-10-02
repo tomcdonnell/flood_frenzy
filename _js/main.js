@@ -9,6 +9,8 @@
 //        * Rain cloud moves in constant direction once per second.
 //        * Rivers formation is visible as rain falls from cloud.
 //        * In game mode, tell player the direction from which rain is coming so he/she can build walls in preparation for flooding.
+//
+//       Maybe: Add ability to dig trenches with a right-click and drag.
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
