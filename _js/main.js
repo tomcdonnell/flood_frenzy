@@ -300,7 +300,6 @@ function onClickGameModeButton()
    $('div.high-scores-div'                     ).hide();
    $('div.information-div'                     ).hide();
    $('input#game-mode-button'                  ).prop('checked', true).closest('label').addClass('selected');
-   $('p.simulation-instructions'               ).hide();
 
    gameState.floodIsReceding  = false;
    gameState.gameMode         = 'game';
@@ -328,7 +327,6 @@ function onClickSimulationModeButton()
    $('div.round-start-popup'             ).hide();
    $('div.round-summary-popup'           ).hide();
    $('input#simulation-mode-button'      ).closest('label').addClass('selected');
-   $('p.simulation-instructions'         ).show();
 
    gameState.gameMode = 'simulation';
 }
@@ -347,7 +345,6 @@ function onClickInformationModeButton()
    $('div.round-start-popup'             ).hide();
    $('div.round-summary-popup'           ).hide();
    $('input#information-mode-button'     ).closest('label').addClass('selected');
-   $('p.simulation-instructions'         ).hide();
 
    gameState.gameMode = 'game';
 }
@@ -366,7 +363,6 @@ function onClickHighScoresModeButton()
    $('div.round-start-popup'             ).hide();
    $('div.round-summary-popup'           ).hide();
    $('input#high-scores-mode-button'     ).closest('label').addClass('selected');
-   $('p.simulation-instructions'         ).hide();
 
    gameState.gameMode = 'high-scores';
 }
