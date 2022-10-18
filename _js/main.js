@@ -641,6 +641,26 @@ function rainUntilWaterLevelRisesByOne(rainR, rainC, boolIncreaseFloodLevel)
       let targetWaterLevel = gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].height + 1;
       addWaterUpToWaterLevelRecursively(localPoolBottomCoords.r, localPoolBottomCoords.c, targetWaterLevel);
    }
+   else
+   {
+      gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].height      += 1;
+      gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].isUnderwater = true;
+
+      let imageIndex = 0;
+
+      if (gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].hasHouse)
+      {
+         if (!gameGrid[localPoolBottomCoords.r][localPoolBottomCoords.c].isUnderwater)
+         {
+            ++gameState.nHomesLost;
+         }
+
+         imageIndex = 22;
+      }
+
+      drawSpriteOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, globalImages[imageIndex]);
+      drawTextOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, 'W');
+   }
 
    ++gameState.nRainDropsFallen;
 }
@@ -697,10 +717,11 @@ function findLocalLowestGridCoordsRecursively(r, c)
       let halfSpriteWidth  = SPRITE_WIDTH  / 2;
       // Draw line from current grid square to new grid square.
       ctx.strokeStyle = 'rgb(60, 60, 200)'; // Set draw colour to blue.
-      ctx.beginPath();                    // Start a path that will later be drawn.
+      ctx.beginPath();                      // Start a path that will later be drawn.
       ctx.moveTo(c * SPRITE_WIDTH + halfSpriteWidth, r * SPRITE_HEIGHT + halfSpriteHeight);
 
-      if (gameGrid[r][c].height > 0)
+      // Only draw the line if either the source or destination point is above water.
+      if (!gameGrid[r][c].isUnderwater || !gameGrid[lowerGridSquare.r][lowerGridSquare.c].isUnderwater)
       {
          ctx.lineTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
 
@@ -799,7 +820,7 @@ function createRainCloudInRandomPosition()
          if (distancePtoCloudMiddle < cloudRadius)
          {
             drawTextOnGridSquare(r, c, 'X');
-//            rainUntilWaterLevelRisesByOne(cloudR, cloudC, true);
+            rainUntilWaterLevelRisesByOne(r, c, false);
          }
       }
    }
