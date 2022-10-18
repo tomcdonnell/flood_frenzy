@@ -4,7 +4,7 @@
 
 // TODO: Implement 'send rain from random direction' button.
 //        * Rain cloud is a circular area of diameter approx. half the grid width.
-//        * Rain cloud moves slowing on to game grid from random direction.
+//        * Rain cloud moves slowly on to game grid from random direction.
 //        * Rain falls on all game grid squares that are covered by rain cloud.
 //        * Rain cloud moves in constant direction once per second.
 //        * Rivers formation is visible as rain falls from cloud.
@@ -779,6 +779,28 @@ function addWaterUpToWaterLevelRecursively(r, c, targetWaterLevel)
          drawSpriteOnGridSquare(coord.r, coord.c, globalImages[imageIndex]);
 
          addWaterUpToWaterLevelRecursively(coord.r, coord.c, targetWaterLevel);
+      }
+   }
+}
+
+function createRainCloudInRandomPosition()
+{
+   let cloudR      = getRandomInt(0, gameState.gridHeight);
+   let cloudC      = getRandomInt(0, gameState.gridWidth );
+   let cloudRadius = gameState.gridWidth / 8;
+
+   for (let r = 0; r < gameState.gridHeight; ++r)
+   {
+      for (let c = 0; c < gameState.gridWidth; ++c)
+      {
+         // h = Math.sqrt((x2-x1)^2 + (y2-y1)^2)
+         let distancePtoCloudMiddle = Math.sqrt(Math.pow(r - cloudR, 2) + Math.pow(c - cloudC, 2));
+
+         if (distancePtoCloudMiddle < cloudRadius)
+         {
+            drawTextOnGridSquare(r, c, 'X');
+//            rainUntilWaterLevelRisesByOne(cloudR, cloudC, true);
+         }
       }
    }
 }
