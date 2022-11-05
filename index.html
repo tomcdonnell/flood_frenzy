@@ -14,6 +14,9 @@
 *.align-l {text-align: left  ;}
 *.align-c {text-align: center;}
 
+*.float-l {float: left ;}
+*.float-r {float: right;}
+
 body
 {
    width: 1023px;
@@ -281,7 +284,7 @@ table.high-scores-table td
        <td>
         <button onclick='onClickRainOnRandomSquare()'>Rain on<br/>random<br/>square</button>
         <button onclick='onClickRainOnAllSquares()'>Rain on<br/>all<br/>squares</button>
-        <button onclick='createRainCloudInRandomPosition()'>Create rain cloud</button>
+        <button onclick='createRainCloud(null, null, null, null)'>Create rain cloud</button>
        </td>
       </tr>
       <tr>
@@ -329,7 +332,10 @@ table.high-scores-table td
    </span>
   </div>
   <div class='color-key-div'>
-   <div>Terrain height color key:</div>
+   <div>
+    <span>Terrain height color key:</span>
+    <span class='float-r' id='rain-direction-indicator'></span>
+   </div>
   </div>
   <canvas id='canvas' width='500' height='500' style='border: solid 1px black'>
    Your browser is too old to display the image!  Upgrade to a newer browser.

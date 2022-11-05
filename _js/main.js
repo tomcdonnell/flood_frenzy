@@ -18,6 +18,7 @@ const MAX_TERRAIN_HEIGHT = 20;
 const N_ROUNDS_PER_GAME  =  5;
 const SPRITE_HEIGHT      = 32; // Must match height of cell images (default 32).
 const SPRITE_WIDTH       = 32; // Must match width  of cell images (default 32).
+const RAINCLOUD_MAX_AGE  = 16;
 
 let ctx                       = document.getElementById('canvas').getContext('2d');
 let globalCoordsVisitedAsKeys = {}; // Used in recusive function to prevent visiting already visited squares.
@@ -35,6 +36,7 @@ let gameState                 =
    nHomesLost         : 0     ,
    nWaterPathsByKey   : {}    , // Keys are in format 'r,c->r,c'.
    playerScore        : 0     ,
+   rainCloudAge       : null  ,
    roundNo            : 1     ,
    totalHousesLost    : 0     ,
    totalHousesSaved   : 0
@@ -132,8 +134,8 @@ function main(images)
 
 function initialiseGameGrid()
 {
-   gameState.gridHeight = $('select#grid-size').val();
-   gameState.gridWidth  = $('select#grid-size').val();
+   gameState.gridHeight = Number($('select#grid-size').val());
+   gameState.gridWidth  = Number($('select#grid-size').val());
    terrainGrid          = generateTerrainGrid();
 //   terrainGrid          =
 //   [
@@ -659,7 +661,7 @@ function rainUntilWaterLevelRisesByOne(rainR, rainC, boolIncreaseFloodLevel)
       }
 
       drawSpriteOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, globalImages[imageIndex]);
-      drawTextOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, 'W');
+//      drawTextOnGridSquare(localPoolBottomCoords.r, localPoolBottomCoords.c, 'W');
    }
 
    ++gameState.nRainDropsFallen;
@@ -720,8 +722,12 @@ function findLocalLowestGridCoordsRecursively(r, c)
       ctx.beginPath();                      // Start a path that will later be drawn.
       ctx.moveTo(c * SPRITE_WIDTH + halfSpriteWidth, r * SPRITE_HEIGHT + halfSpriteHeight);
 
-      // Only draw the line if either the source or destination point is above water.
-      if (!gameGrid[r][c].isUnderwater || !gameGrid[lowerGridSquare.r][lowerGridSquare.c].isUnderwater)
+      // Only draw the line if either the source or destination point is above water, and the source point is higher than the destination point.
+      if
+      (
+         (!gameGrid[r][c].isUnderwater || !gameGrid[lowerGridSquare.r][lowerGridSquare.c].isUnderwater) &&
+         (gameGrid[r][c].height > gameGrid[lowerGridSquare.r][lowerGridSquare.c].height)
+      )
       {
          ctx.lineTo(lowerGridSquare.c * SPRITE_WIDTH + halfSpriteWidth, lowerGridSquare.r * SPRITE_HEIGHT + halfSpriteHeight);
 
@@ -733,7 +739,7 @@ function findLocalLowestGridCoordsRecursively(r, c)
             ++gameState.nWaterPathsByKey[key];
 
             ctx.lineCap   = 'round';
-            ctx.lineWidth = gameState.nWaterPathsByKey[key] / 2;
+            ctx.lineWidth = Math.min(gameState.nWaterPathsByKey[key] / 2, 5);
          }
          else
          {
@@ -804,11 +810,54 @@ function addWaterUpToWaterLevelRecursively(r, c, targetWaterLevel)
    }
 }
 
-function createRainCloudInRandomPosition()
+function createRainCloud(cloudR, cloudC, vectorX, vectorY)
 {
-   let cloudR      = getRandomInt(0, gameState.gridHeight);
-   let cloudC      = getRandomInt(0, gameState.gridWidth );
    let cloudRadius = gameState.gridWidth / 8;
+
+   if (cloudR === null && cloudC === null)
+   {
+      // Place the cloud in a random position either on the the top, bottom, left, or right of the grid.
+      switch (getRandomInt(0, 4))
+      {
+       case 0: cloudR = -cloudRadius                       ; cloudC = getRandomInt(-cloudRadius, gameState.gridHeight + cloudRadius); break; // T.
+       case 1: cloudR =  cloudRadius + gameState.gridHeight; cloudC = getRandomInt(-cloudRadius, gameState.gridHeight + cloudRadius); break; // B.
+       case 2: cloudC = -cloudRadius                       ; cloudR = getRandomInt(-cloudRadius, gameState.gridWidth  + cloudRadius); break; // L.
+       case 3: cloudC =  cloudRadius + gameState.gridWidth ; cloudR = getRandomInt(-cloudRadius, gameState.gridWidth  + cloudRadius); break; // R.
+       default: throw new Exception('Impossible case.');
+      }
+   }
+
+
+   if (vectorX === null && vectorY === null)
+   {
+      gameState.rainCloudAge = 0;
+
+      // Direct vectorX,Y towards the center of the grid.
+      vectorX = ((gameState.gridWidth  * .25 <= cloudC && cloudC < gameState.gridWidth  * .75)? 0: ((cloudC < gameState.gridWidth  / 2)? 1: -1));
+      vectorY = ((gameState.gridHeight * .25 <= cloudR && cloudR < gameState.gridHeight * .75)? 0: ((cloudR < gameState.gridHeight / 2)? 1: -1));
+
+      let directionText = null;
+
+      switch
+      (
+         ((vectorY === 0)? '00': ((vectorY < 0)? '-1': '+1')) + '|' +
+         ((vectorX === 0)? '00': ((vectorX < 0)? '-1': '+1'))
+      )
+      {
+       case '-1|-1': directionText = 'southeast'; break;
+       case '-1|00': directionText = 'south'    ; break;
+       case '-1|+1': directionText = 'southwest'; break;
+       case '00|-1': directionText = 'east'     ; break;
+       case '00|+1': directionText = 'west'     ; break;
+       case '+1|-1': directionText = 'northeast'; break;
+       case '+1|00': directionText = 'north'    ; break;
+       case '+1|+1': directionText = 'northwest'; break;
+       default: throw new Exception('Impossible case.');
+      }
+
+      $('#rain-direction-indicator').html('Rain is coming from the ' + directionText + '!');
+   }
+
 
    for (let r = 0; r < gameState.gridHeight; ++r)
    {
@@ -819,11 +868,52 @@ function createRainCloudInRandomPosition()
 
          if (distancePtoCloudMiddle < cloudRadius)
          {
-            drawTextOnGridSquare(r, c, 'X');
+//            drawTextOnGridSquare(r, c, 'R');
             rainUntilWaterLevelRisesByOne(r, c, false);
          }
       }
    }
+
+   if (gameState.rainCloudAge > 2 * cloudRadius)
+   {
+      // Add randomisation to rain direction.
+      vectorX += getRandomInt(-1, 2);
+      vectorY += getRandomInt(-1, 2);
+   }
+
+   if (gameState.rainCloudAge < RAINCLOUD_MAX_AGE)
+   {
+      window.setTimeout
+      (
+         function ()
+         {
+            cloudC = cloudC + vectorX;
+            cloudR = cloudR + vectorY;
+
+            if
+            (
+               cloudC < 0                    && vectorX < 0 || // Off to the left   and heading further left .
+               cloudC > gameState.gridWidth  && vectorX > 0 || // Off to the right  and heading further right.
+               cloudR < 0                    && vectorY < 0 || // Off to the top    and heading further up   .
+               cloudR > gameState.gridHeight && vectorY > 0    // Off to the bottom and heading further down .
+            )
+            {
+               // End of rain cloud.
+            }
+            else
+            {
+               createRainCloud(cloudR, cloudC, vectorX, vectorY);
+            }
+         },
+         ((gameState.rainCloudAge === 0)? 5000: 1000) // A long delay at the start allows the player to devise a plan.
+      );
+   }
+   else
+   {
+      // End of rain cloud.
+   }
+
+   gameState.rainCloudAge++;
 }
 
 // Utility functions. ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
