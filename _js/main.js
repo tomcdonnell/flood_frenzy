@@ -458,9 +458,7 @@ function onMouseDownCanvas(e)
 {
    switch ($('select[name=mouseOnCanvasMode]').val())
    {
-    case 'clickAndDragToBuildWalls' : gameState.currentDragAction = 'buildWalls' ; break;
-    case 'clickAndDragToAddEarth'   : gameState.currentDragAction = 'addEarth'   ; break;
-    case 'clickAndDragToRemoveEarth': gameState.currentDragAction = 'removeEarth'; break;
+    case 'clickAndDragToBuildWalls': gameState.currentDragAction = 'buildWalls'; break;
     default: gameState.currentDragAction = null;
    }
 }
@@ -496,26 +494,6 @@ function onMouseMoveCanvas(e)
             gameGrid[mouseGridR][mouseGridC].height = 19;
             break;
 
-          case 'addEarth':
-            gameGrid[mouseGridR][mouseGridC].isWall = false;
-
-            if (gameGrid[mouseGridR][mouseGridC].height < MAX_TERRAIN_HEIGHT)
-            {
-               ++gameGrid[mouseGridR][mouseGridC].height;
-               drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
-            }
-            break;
-
-          case 'removeEarth':
-            gameGrid[mouseGridR][mouseGridC].isWall = false;
-
-            if (gameGrid[mouseGridR][mouseGridC].height > 0)
-            {
-               --gameGrid[mouseGridR][mouseGridC].height;
-               drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
-            }
-            break;
-
           default:
             throw "Unknown value '" + gameState.currentDragAction + "' for currentDragAction.";
          }
@@ -530,21 +508,49 @@ function onMouseMoveCanvas(e)
 
 function onClickCanvas(e)
 {
-   if (gameState.gameMode != 'simulation' || $('select[name=mouseOnCanvasMode]').val() !== 'clickToRainOnSquare')
+   if (gameState.gameMode != 'simulation')
    {
       return;
    }
 
-   gameState.nWaterPathsByKey = {};
+   let mouseOnCanvasMode = $('select[name=mouseOnCanvasMode]').val();
 
-   let canvasJq     = $('canvas');
-   let canvasOffset = canvasJq.offset();
-   let mouseX       = e.pageX - canvasOffset.left;
-   let mouseY       = e.pageY - canvasOffset.top;
-   let mouseGridR   = Math.floor(mouseY / SPRITE_HEIGHT);
-   let mouseGridC   = Math.floor(mouseX / SPRITE_WIDTH );
+   if (['clickToAddEarth', 'clickToRemoveEarth', 'clickToRainOnSquare'].includes(mouseOnCanvasMode))
+   {
+      let canvasJq     = $('canvas');
+      let canvasOffset = canvasJq.offset();
+      let mouseX       = e.pageX - canvasOffset.left;
+      let mouseY       = e.pageY - canvasOffset.top;
+      let mouseGridR   = Math.floor(mouseY / SPRITE_HEIGHT);
+      let mouseGridC   = Math.floor(mouseX / SPRITE_WIDTH );
 
-   rainUntilWaterLevelRisesByOne(mouseGridR, mouseGridC, true);
+      switch (mouseOnCanvasMode)
+      {
+       case 'clickToAddEarth':
+         if (gameGrid[mouseGridR][mouseGridC].height < MAX_TERRAIN_HEIGHT)
+         {
+            ++gameGrid[mouseGridR][mouseGridC].height;
+            drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
+         }
+         break;
+
+       case 'clickToRemoveEarth':
+         if (gameGrid[mouseGridR][mouseGridC].height > 0)
+         {
+            --gameGrid[mouseGridR][mouseGridC].height;
+            drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
+         }
+         break;
+
+       case 'clickToRainOnSquare':
+         gameState.nWaterPathsByKey = {};
+         rainUntilWaterLevelRisesByOne(mouseGridR, mouseGridC, true);
+         break;
+
+       default:
+         // Do nothing.
+      }
+   }
 }
 
 // Flood functions. //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
