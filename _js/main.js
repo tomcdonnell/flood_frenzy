@@ -2,11 +2,9 @@
  * vim: ts=3 sw=3 et wrap co=150 go-=b
  */
 
-// TODO: Add ability to dig holes as well as build walls.
-
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const MAX_TERRAIN_HEIGHT = 20;
+const MAX_TERRAIN_HEIGHT = 19;
 const N_ROUNDS_PER_GAME  =  5;
 const SPRITE_HEIGHT      = 32; // Must match height of cell images (default 32).
 const SPRITE_WIDTH       = 32; // Must match width  of cell images (default 32).
@@ -19,12 +17,12 @@ let gameGrid                  = [];
 let terrainGrid               = [];
 let gameState                 =
 {
+   currentDragAction  : null  ,
    floodIsReceding    : false ,
    gameMode           : 'game', // Possible values: {'game', 'simulation', 'information', 'high-scores'}
    gridHeight         : null  ,
    gridNumbersAreShown: false ,
    gridWidth          : null  ,
-   isBuildingWalls    : false ,
    nHomesLost         : 0     ,
    nWaterPathsByKey   : {}    , // Keys are in format 'r,c->r,c'.
    playerScore        : 0     ,
@@ -129,7 +127,7 @@ function initialiseGameGrid()
    gameState.gridHeight = Number($('select#grid-size').val());
    gameState.gridWidth  = Number($('select#grid-size').val());
    terrainGrid          = generateTerrainGrid();
-//   terrainGrid          =
+//   terrainGrid =
 //   [
 //      // Test data set.  To use, must set gameState.gridHeight and gameState.gridWidth to match dimensions here.
 //      [19, 19, 19, 19, 19, 19, 19,  9],
@@ -233,12 +231,12 @@ function generateTerrainGrid()
    {
       let mountainTopX   = getRandomInt(0, gameState.gridWidth );
       let mountainTopY   = getRandomInt(0, gameState.gridHeight);
-      let mountainHeight = getRandomInt(MAX_TERRAIN_HEIGHT - 5, MAX_TERRAIN_HEIGHT);
+      let mountainHeight = getRandomInt(MAX_TERRAIN_HEIGHT - 5, MAX_TERRAIN_HEIGHT + 1);
 
       terrainGrid[mountainTopX][mountainTopY] = mountainHeight;
    }
 
-   for (let i = 0; i < MAX_TERRAIN_HEIGHT; ++i)
+   for (let i = 0; i <= MAX_TERRAIN_HEIGHT; ++i)
    {
       let tempTerrainGrid = copyArray(terrainGrid);
 
@@ -456,12 +454,25 @@ function onClickRecedeFlood()
    decreaseWaterLevelEverywhereByOne();
 }
 
-function onMouseDownCanvas(e) {if ($('select[name=mouseOnCanvasMode]').val() === 'clickAndDragToBuildWalls') {gameState.isBuildingWalls = true ;}}
-function onMouseUpCanvas(e)   {if ($('select[name=mouseOnCanvasMode]').val() === 'clickAndDragToBuildWalls') {gameState.isBuildingWalls = false;}}
+function onMouseDownCanvas(e)
+{
+   switch ($('select[name=mouseOnCanvasMode]').val())
+   {
+    case 'clickAndDragToBuildWalls' : gameState.currentDragAction = 'buildWalls' ; break;
+    case 'clickAndDragToAddEarth'   : gameState.currentDragAction = 'addEarth'   ; break;
+    case 'clickAndDragToRemoveEarth': gameState.currentDragAction = 'removeEarth'; break;
+    default: gameState.currentDragAction = null;
+   }
+}
+
+function onMouseUpCanvas(e)
+{
+   gameState.currentDragAction = null;
+}
 
 function onMouseMoveCanvas(e)
 {
-   if (gameState.isBuildingWalls)
+   if (gameState.currentDragAction !== null)
    {
       let canvasJq     = $('canvas');
       let canvasOffset = canvasJq.offset();
@@ -472,18 +483,42 @@ function onMouseMoveCanvas(e)
 
       if (mouseGridR > gameState.gridHeight || mouseGridC > gameState.gridWidth)
       {
-         throw new Exception('Mouse grid coordinates out of expected range.');
+         throw 'Mouse grid coordinates out of expected range.';
       }
 
-      if (gameGrid[mouseGridR][mouseGridC].height < MAX_TERRAIN_HEIGHT - 1)
+      if (gameGrid[mouseGridR][mouseGridC].height <= MAX_TERRAIN_HEIGHT)
       {
-         drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[20]);
-         gameGrid[mouseGridR][mouseGridC].isWall = true;
-         gameGrid[mouseGridR][mouseGridC].height = 19;
+         switch (gameState.currentDragAction)
+         {
+          case 'buildWalls':
+            drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[20]);
+            gameGrid[mouseGridR][mouseGridC].isWall = true;
+            gameGrid[mouseGridR][mouseGridC].height = 19;
+            break;
 
-         --gameState.wallBudget;
+          case 'addEarth':
+            gameGrid[mouseGridR][mouseGridC].isWall = false;
 
-         $('span.wall-budget').html(gameState.wallBudget);
+            if (gameGrid[mouseGridR][mouseGridC].height < MAX_TERRAIN_HEIGHT)
+            {
+               ++gameGrid[mouseGridR][mouseGridC].height;
+               drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
+            }
+            break;
+
+          case 'removeEarth':
+            gameGrid[mouseGridR][mouseGridC].isWall = false;
+
+            if (gameGrid[mouseGridR][mouseGridC].height > 0)
+            {
+               --gameGrid[mouseGridR][mouseGridC].height;
+               drawSpriteOnGridSquare(mouseGridR, mouseGridC, globalImages[getImageIndexForGridSquare(mouseGridR, mouseGridC)]);
+            }
+            break;
+
+          default:
+            throw "Unknown value '" + gameState.currentDragAction + "' for currentDragAction.";
+         }
 
          if (gameState.gridNumbersAreShown)
          {
@@ -574,20 +609,26 @@ function decreaseWaterLevelEverywhereByOne()
             {
                gameGrid[r][c].isUnderwater = (gameGrid[r][c].heightOrig <= 1);
 
-               let imageIndex =
-               (
-                  (gameGrid[r][c].hasHouse)? 22:
-                  (
-                     (gameGrid[r][c].isWall)? 20:
-                     gameGrid[r][c].height
-                  )
-               );
-
-               drawSpriteOnGridSquare(r, c, globalImages[imageIndex]);
+               drawSpriteOnGridSquare(r, c, globalImages[getImageIndexForGridSquare(r, c)]);
             }
          }
       }
    }
+}
+
+
+function getImageIndexForGridSquare(r, c)
+{
+   let imageIndex =
+   (
+      (gameGrid[r][c].hasHouse)? 22:
+      (
+         (gameGrid[r][c].isWall)? 20:
+         gameGrid[r][c].height
+      )
+   );
+
+   return imageIndex;
 }
 
 function rainOnSquaresOfHeight(targetHeight)
@@ -815,7 +856,7 @@ function createRainCloud(cloudR, cloudC, vectorX, vectorY)
        case 1: cloudR =  cloudRadius + gameState.gridHeight; cloudC = getRandomInt(-cloudRadius, gameState.gridHeight + cloudRadius); break; // B.
        case 2: cloudC = -cloudRadius                       ; cloudR = getRandomInt(-cloudRadius, gameState.gridWidth  + cloudRadius); break; // L.
        case 3: cloudC =  cloudRadius + gameState.gridWidth ; cloudR = getRandomInt(-cloudRadius, gameState.gridWidth  + cloudRadius); break; // R.
-       default: throw new Exception('Impossible case.');
+       default: throw 'Impossible case.';
       }
    }
 
@@ -844,7 +885,7 @@ function createRainCloud(cloudR, cloudC, vectorX, vectorY)
        case '+1|-1': directionText = 'northeast'; break;
        case '+1|00': directionText = 'north'    ; break;
        case '+1|+1': directionText = 'northwest'; break;
-       default: throw new Exception('Impossible case.');
+       default: throw 'Impossible case.';
       }
 
       $('#rain-direction-indicator').html('Rain is coming from the ' + directionText + '!');
