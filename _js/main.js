@@ -2,15 +2,7 @@
  * vim: ts=3 sw=3 et wrap co=150 go-=b
  */
 
-// TODO: Implement 'send rain from random direction' button.
-//        * Rain cloud is a circular area of diameter approx. half the grid width.
-//        * Rain cloud moves slowly on to game grid from random direction.
-//        * Rain falls on all game grid squares that are covered by rain cloud.
-//        * Rain cloud moves in constant direction once per second.
-//        * Rivers formation is visible as rain falls from cloud.
-//        * In game mode, tell player the direction from which rain is coming so he/she can build walls in preparation for flooding.
-//
-//       Maybe: Add ability to dig trenches with a right-click and drag.
+// TODO: Add ability to dig holes as well as build walls.
 
 // Global variables. /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -179,7 +171,7 @@ function initialiseGameGrid()
       let houseC          = getRandomInt(0, gameState.gridWidth );
       let houseGridSquare = gameGrid[houseR][houseC];
 
-      if (3 < houseGridSquare.height && houseGridSquare.height < 15)
+      if (3 < houseGridSquare.height && houseGridSquare.height < 12)
       {
          houseGridSquare.hasHouse = true;
          ++nHousesAdded;
@@ -866,7 +858,12 @@ function createRainCloud(cloudR, cloudC, vectorX, vectorY)
          // h = Math.sqrt((x2-x1)^2 + (y2-y1)^2)
          let distancePtoCloudMiddle = Math.sqrt(Math.pow(r - cloudR, 2) + Math.pow(c - cloudC, 2));
 
-         if (distancePtoCloudMiddle < cloudRadius)
+         if
+         (
+            distancePtoCloudMiddle < cloudRadius
+//            gameGrid[r][c].height >= 12          && // Rain only on mountains (so as to make lowlands defensible by building walls).
+//            !gameGrid[r][c].isWall                  // Do not rain on walls.
+         )
          {
 //            drawTextOnGridSquare(r, c, 'R');
             rainUntilWaterLevelRisesByOne(r, c, false);
@@ -898,7 +895,7 @@ function createRainCloud(cloudR, cloudC, vectorX, vectorY)
                cloudR > gameState.gridHeight && vectorY > 0    // Off to the bottom and heading further down .
             )
             {
-               // End of rain cloud.
+               $('#rain-direction-indicator').html('The rain has stopped.');
             }
             else
             {
@@ -910,7 +907,7 @@ function createRainCloud(cloudR, cloudC, vectorX, vectorY)
    }
    else
    {
-      // End of rain cloud.
+      $('#rain-direction-indicator').html('The rain has stopped.');
    }
 
    gameState.rainCloudAge++;
